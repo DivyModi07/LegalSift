@@ -1,0 +1,103 @@
+import { Link } from 'react-router-dom';
+import { Scale, AlertTriangle } from 'lucide-react';
+import useAuthStore from '../store/authStore';
+
+const Footer = () => {
+  const { isAuthenticated, userRole } = useAuthStore();
+
+  const getQuickLinks = () => {
+    if (isAuthenticated && userRole === 'admin') {
+      return [
+        { to: '/admin/complaints', label: 'Recent Complaints' },
+        { to: '/admin/analytics', label: 'Analytics' },
+        { to: '/admin/lawyers', label: 'Lawyer Management' },
+      ];
+    } else if (isAuthenticated && userRole === 'user') {
+      return [
+        { to: '/submit-complaint', label: 'Submit Complaint' },
+        { to: '/chatbot', label: 'Legal Assistant' },
+        { to: '/dashboard', label: 'Dashboard' },
+        { to: '/ipc-explorer', label: 'IPC Explorer' },
+      ];
+    } else {
+      return [
+        { to: '/submit-complaint', label: 'Submit Complaint' },
+        { to: '/ipc-explorer', label: 'IPC Explorer' },
+        { to: '/chatbot', label: 'Legal Assistant' },
+        { to: '/lawyer-application', label: 'Apply as Lawyer' },
+      ];
+    }
+  };
+
+  const quickLinks = getQuickLinks();
+
+  return (
+    <footer className="bg-gradient-to-r from-primary-800 to-primary-900 text-white">
+      <div className="container-max py-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 lg:gap-12">
+          {/* Brand Section */}
+          <div className="md:col-span-1">
+            <div className="flex items-center space-x-2 mb-4">
+              <Scale className="h-6 w-6 text-primary-200" />
+              <span className="text-lg font-bold">LegalSift</span>
+            </div>
+            <p className="text-primary-200 text-sm leading-relaxed">
+              Empowering citizens with AI-driven legal assistance and comprehensive IPC exploration tools.
+            </p>
+          </div>
+
+          {/* Quick Links */}
+          <div className="md:col-span-1">
+            <h3 className="text-sm font-semibold text-white mb-4">Quick Links</h3>
+            <div className="flex flex-col space-y-3">
+              {quickLinks.map((link, index) => (
+                <Link 
+                  key={index}
+                  to={link.to} 
+                  className="text-primary-100 hover:text-white text-sm transition-colors"
+                >
+                  {link.label}
+                </Link>
+              ))}
+            </div>
+          </div>
+
+          {/* Legal Notice */}
+          <div className="md:col-span-1">
+            <div className="bg-white/10 rounded-xl p-4 border border-white/20">
+              <div className="flex items-start space-x-3">
+                <AlertTriangle className="h-5 w-5 text-amber-300 flex-shrink-0 mt-0.5" />
+                <div>
+                  <h4 className="font-semibold text-white text-sm mb-2">Important Legal Notice</h4>
+                  <p className="text-primary-50 text-xs leading-relaxed">
+                    This platform provides AI-assisted legal guidance for informational purposes only. 
+                    For legal advice, please consult a qualified lawyer. In emergencies, contact your nearest police station immediately.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Bottom Section */}
+        <div className="border-t border-white/20 mt-8 pt-6">
+          <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
+            <p className="text-primary-200 text-sm">
+              © 2024 LegalSift. All rights reserved.
+            </p>
+            <div className="flex space-x-6 text-sm">
+              <Link to="/privacy" className="text-primary-200 hover:text-white transition-colors">
+                Privacy Policy
+              </Link>
+              <Link to="/terms" className="text-primary-200 hover:text-white transition-colors">
+                Terms of Service
+              </Link>
+            </div>
+          </div>
+        </div>
+      </div>
+    </footer>
+  );
+};
+
+export default Footer;
