@@ -11,9 +11,12 @@ from rest_framework.views import APIView
 
 from rest_framework_simplejwt.tokens import RefreshToken
 from .serializers import UserSerializer
+from django.conf import settings
+
 
 # Get your custom user model
 User = get_user_model()
+
 
 
 # --- Core Authentication Views (Class-Based) ---
@@ -89,40 +92,39 @@ def check_email_phone(request):
 
 
 @api_view(['POST'])
-@permission_classes([AllowAny]) # This endpoint must be public
+@permission_classes([AllowAny])
 def send_otp_email(request):
-    """
-    Sends a time-sensitive OTP to a user's email for password reset.
-    Always returns a success message to prevent user enumeration.
-    """
     email = request.data.get("email")
     if not email:
         return Response({"error": "Email is required"}, status=status.HTTP_400_BAD_REQUEST)
-    
-    try:
-        user = User.objects.get(email=email)
-    except User.DoesNotExist:
-        # SECURITY: Do not reveal that the user does not exist.
-        # Pretend to send the email anyway.
-        return Response({"message": "If an account with this email exists, an OTP has been sent."}, status=status.HTTP_200_OK)
 
-    # Generate and store the OTP in the user's session
+    # Check if user exists
+    user_exists = User.objects.filter(email=email).exists()
+
+    # Generate OTP always (don’t leak existence info)
     otp = random.randint(100000, 999999)
     request.session['otp'] = str(otp)
     request.session['otp_email'] = email
     request.session['otp_time'] = timezone.now().isoformat()
 
-    # Prepare and send the email
     subject = "Your OTP for Password Reset"
     message = f"Your OTP is {otp}. It will expire in 10 minutes."
-    
+
+    print("DEBUG email received from request:", email)
+    print("DEBUG sending FROM:", settings.DEFAULT_FROM_EMAIL)
+    print("DEBUG sending TO:", [email])
+
     try:
-        send_mail(subject, message, None, [email])
-        return Response({"message": "If an account with this email exists, an OTP has been sent."}, status=status.HTTP_200_OK)
+        send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, [email])
     except Exception as e:
-        # Log the actual error for debugging
         print(f"Email sending failed: {e}")
         return Response({"error": "Failed to send email due to a server error."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    response_data = {"message": "If an account with this email exists, an OTP has been sent."}
+    if settings.DEBUG:
+        response_data["dev_otp"] = otp  # only for dev testing
+    return Response(response_data, status=status.HTTP_200_OK)
+
 
 
 @api_view(['POST'])
