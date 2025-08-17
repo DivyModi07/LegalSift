@@ -1,7 +1,7 @@
-# # apps/complaints/urls.py
-# from django.urls import path
-# from . import views
+from django.urls import path
+from .views import ComplaintAnalysisView
 
-# urlpatterns = [
-#     path("test/", views.test, name="complaint-test"),
-# ]
+urlpatterns = [
+    # This creates the URL: /api/complaints/analyze/
+    path('analyze/', ComplaintAnalysisView.as_view(), name='analyze-complaint'),
+]
