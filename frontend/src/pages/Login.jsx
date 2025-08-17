@@ -41,18 +41,28 @@ const Login = () => {
       return;
     }
     
-    const result = await login(formData.email, formData.password);
-    
-    if (result.success) {
-      toast.success('Login successful!');
-      // Redirect based on user role
-      if (userRole === 'admin') {
-        navigate('/admin/complaints');
+    try {
+      console.log('Starting login process...');
+      const result = await login(formData.email, formData.password);
+      console.log('Login result received:', result);
+      
+      if (result.success) {
+        toast.success('Login successful!');
+        // Redirect based on user role
+        if (userRole === 'admin') {
+          navigate('/admin/complaints');
+        } else {
+          navigate('/dashboard');
+        }
       } else {
-        navigate('/dashboard');
+        // Show notification for wrong credentials
+        console.log('Login failed, showing error notification');
+        toast.error('Invalid email or password. Please try again.');
       }
-    } else {
-      toast.error(result.error || 'Login failed. Please try again.');
+    } catch (error) {
+      console.log('Login error caught:', error);
+      // Show notification for any error
+      toast.error('Invalid email or password. Please try again.');
     }
   };
 
@@ -92,7 +102,7 @@ const Login = () => {
 
         {/* Login Form */}
         <div className="card p-8">
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form onSubmit={handleSubmit} className="space-y-6" noValidate>
             {/* Email Field */}
             <div>
               <label htmlFor="email" className="form-label">
@@ -156,6 +166,19 @@ const Login = () => {
               )}
             </div>
 
+            {/* Forgot Password Link */}
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-neutral-500">
+                Having trouble signing in?
+              </span>
+              <Link 
+                to="/forgot-password" 
+                className="text-sm text-primary-600 hover:text-primary-500 font-medium"
+              >
+                Forgot your password?
+              </Link>
+            </div>
+
             {/* Submit Button */}
             <button
               type="submit"
@@ -173,14 +196,7 @@ const Login = () => {
             </button>
           </form>
 
-          {/* Demo Credentials */}
-          <div className="mt-6 p-4 bg-neutral-50 rounded-lg">
-            <h4 className="text-sm font-medium text-neutral-700 mb-2">Demo Credentials:</h4>
-            <div className="text-xs text-neutral-600 space-y-1">
-              <p><strong>User:</strong> user@example.com / password</p>
-              <p><strong>Admin:</strong> admin@example.com / password</p>
-            </div>
-          </div>
+
         </div>
 
         {/* Sign Up Link */}

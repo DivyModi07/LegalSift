@@ -1,5 +1,12 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import { 
+  registerUser, 
+  loginUser, 
+  sendOTP, 
+  verifyOTP, 
+  checkEmailPhone 
+} from '../services/userService';
 
 const useAuthStore = create(
   persist(
@@ -17,16 +24,47 @@ const useAuthStore = create(
       login: async (email, password) => {
         set({ isLoading: true });
         try {
-          // Mock API call - replace with actual API
-          const response = await mockLoginAPI(email, password);
-          set({
-            user: response.user,
-            isAuthenticated: true,
-            userRole: response.user.role,
-            isLoading: false,
-          });
-          return { success: true };
+          console.log('Attempting login with email:', email);
+          const result = await loginUser(email, password);
+          console.log('Login result:', result);
+          
+          if (result.success) {
+            console.log('Login successful, data:', result.data);
+            
+            // Check if we have the expected data structure
+            if (!result.data || !result.data.user || !result.data.access) {
+              console.error('Invalid login response structure:', result.data);
+              set({ isLoading: false });
+              return { success: false, error: 'Invalid response from server' };
+            }
+            
+            // Store tokens
+            localStorage.setItem('access_token', result.data.access);
+            localStorage.setItem('refresh_token', result.data.refresh);
+            
+            // Set user data
+            const user = {
+              id: result.data.user.id,
+              name: `${result.data.user.first_name} ${result.data.user.last_name}`,
+              email: result.data.user.email,
+              role: result.data.user.role || 'user', // Use role from backend or default to 'user'
+            };
+            
+            console.log('Setting user data:', user);
+            
+            set({
+              user,
+              isAuthenticated: true,
+              userRole: user.role,
+              isLoading: false,
+            });
+            return { success: true };
+          } else {
+            set({ isLoading: false });
+            return { success: false, error: result.error };
+          }
         } catch (error) {
+          console.error('Login error in store:', error);
           set({ isLoading: false });
           return { success: false, error: error.message };
         }
@@ -36,16 +74,47 @@ const useAuthStore = create(
       register: async (userData) => {
         set({ isLoading: true });
         try {
-          // Mock API call - replace with actual API
-          const response = await mockRegisterAPI(userData);
-          set({
-            user: response.user,
-            isAuthenticated: true,
-            userRole: response.user.role,
-            isLoading: false,
-          });
-          return { success: true };
+          console.log('Attempting registration with data:', userData);
+          const result = await registerUser(userData);
+          console.log('Registration result:', result);
+          
+          if (result.success) {
+            console.log('Registration successful, data:', result.data);
+            
+            // Check if we have the expected data structure
+            if (!result.data || !result.data.user || !result.data.access) {
+              console.error('Invalid response structure:', result.data);
+              set({ isLoading: false });
+              return { success: false, error: 'Invalid response from server' };
+            }
+            
+            // Store tokens
+            localStorage.setItem('access_token', result.data.access);
+            localStorage.setItem('refresh_token', result.data.refresh);
+            
+            // Set user data
+            const user = {
+              id: result.data.user.id,
+              name: `${result.data.user.first_name} ${result.data.user.last_name}`,
+              email: result.data.user.email,
+              role: result.data.user.role || 'user', // Use role from backend or default to 'user'
+            };
+            
+            console.log('Setting user data:', user);
+            
+            set({
+              user,
+              isAuthenticated: true,
+              userRole: user.role,
+              isLoading: false,
+            });
+            return { success: true };
+          } else {
+            set({ isLoading: false });
+            return { success: false, error: result.error };
+          }
         } catch (error) {
+          console.error('Registration error in store:', error);
           set({ isLoading: false });
           return { success: false, error: error.message };
         }
@@ -55,10 +124,9 @@ const useAuthStore = create(
       sendOTP: async (email) => {
         set({ isVerifyingOTP: true });
         try {
-          // Mock API call - replace with actual API
-          await mockSendOTPAPI(email);
+          const result = await sendOTP(email);
           set({ isVerifyingOTP: false });
-          return { success: true };
+          return result;
         } catch (error) {
           set({ isVerifyingOTP: false });
           return { success: false, error: error.message };
@@ -69,10 +137,9 @@ const useAuthStore = create(
       verifyOTP: async (email, otp) => {
         set({ isVerifyingOTP: true });
         try {
-          // Mock API call - replace with actual API
-          const response = await mockVerifyOTPAPI(email, otp);
+          const result = await verifyOTP(email, otp);
           set({ isVerifyingOTP: false });
-          return { success: true, user: response.user };
+          return result;
         } catch (error) {
           set({ isVerifyingOTP: false });
           return { success: false, error: error.message };
@@ -81,6 +148,10 @@ const useAuthStore = create(
       
       // Logout
       logout: () => {
+        // Clear tokens from localStorage
+        localStorage.removeItem('access_token');
+        localStorage.removeItem('refresh_token');
+        
         set({
           user: null,
           isAuthenticated: false,
@@ -99,6 +170,28 @@ const useAuthStore = create(
           });
         }
       },
+      
+      // Check email and phone availability
+      checkEmailPhone: async (email, phone) => {
+        try {
+          const result = await checkEmailPhone(email, phone);
+          return result;
+        } catch (error) {
+          return { success: false, error: error.message };
+        }
+      },
+      
+      // Check if user is already authenticated (for page refreshes)
+      checkAuth: () => {
+        const token = localStorage.getItem('access_token');
+        const user = get().user;
+        
+        if (token && user) {
+          set({ isAuthenticated: true, userRole: user.role });
+          return true;
+        }
+        return false;
+      },
     }),
     {
       name: 'auth-storage',
@@ -111,69 +204,6 @@ const useAuthStore = create(
   )
 );
 
-// Mock API functions - replace with actual API calls
-const mockLoginAPI = async (email, password) => {
-  // Simulate API delay
-  await new Promise(resolve => setTimeout(resolve, 1000));
-  
-  // Mock user data
-  const mockUsers = {
-    'user@example.com': {
-      id: 1,
-      name: 'John Doe',
-      email: 'user@example.com',
-      phone: '+91 9876543210',
-      role: 'user',
-    },
-    'admin@example.com': {
-      id: 2,
-      name: 'Admin User',
-      email: 'admin@example.com',
-      phone: '+91 9876543211',
-      role: 'admin',
-    },
-  };
-  
-  if (mockUsers[email] && password === 'password') {
-    return { user: mockUsers[email] };
-  }
-  
-  throw new Error('Invalid credentials');
-};
 
-const mockRegisterAPI = async (userData) => {
-  await new Promise(resolve => setTimeout(resolve, 1000));
-  
-  return {
-    user: {
-      id: Date.now(),
-      ...userData,
-      role: 'user',
-    },
-  };
-};
-
-const mockSendOTPAPI = async (email) => {
-  await new Promise(resolve => setTimeout(resolve, 1000));
-  // In real app, this would send OTP to email
-  console.log(`OTP sent to ${email}`);
-};
-
-const mockVerifyOTPAPI = async (email, otp) => {
-  await new Promise(resolve => setTimeout(resolve, 1000));
-  
-  // Mock OTP verification (any 6-digit number works)
-  if (otp.length === 6 && /^\d+$/.test(otp)) {
-    return {
-      user: {
-        id: Date.now(),
-        email,
-        role: 'user',
-      },
-    };
-  }
-  
-  throw new Error('Invalid OTP');
-};
 
 export default useAuthStore;

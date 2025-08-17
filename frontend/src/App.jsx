@@ -11,6 +11,7 @@ import Footer from './components/Footer';
 import LandingPage from './pages/LandingPage';
 import Login from './pages/Login';
 import Register from './pages/Register';
+import ForgotPassword from './pages/ForgotPassword';
 import UserDashboard from './pages/UserDashboard';
 import SubmitComplaint from './pages/SubmitComplaint';
 import IPCExplorer from './pages/IPCExplorer';
@@ -52,7 +53,12 @@ const HomeRoute = () => {
 };
 
 function App() {
-  const { isAuthenticated, userRole } = useAuthStore();
+  const { isAuthenticated, userRole, checkAuth } = useAuthStore();
+  
+  // Check authentication on app load
+  useEffect(() => {
+    checkAuth();
+  }, [checkAuth]);
 
   return (
     <Router>
@@ -65,6 +71,7 @@ function App() {
             <Route path="/" element={<HomeRoute />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/ipc-explorer" element={<IPCExplorer />} />
             <Route path="/lawyer-application" element={<LawyerApplication />} />
             

@@ -364,32 +364,7 @@ const Profile = () => {
             </form>
           </div>
 
-          {/* Account Information */}
-          <div className="mt-6 card p-6">
-            <h3 className="text-lg font-semibold text-neutral-900 mb-4">
-              Account Information
-            </h3>
-            <div className="space-y-3">
-              <div className="flex justify-between">
-                <span className="text-neutral-600">Account Type</span>
-                <span className="font-medium text-neutral-900 capitalize">
-                  {user?.role || 'User'}
-                </span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-neutral-600">Member Since</span>
-                <span className="font-medium text-neutral-900">
-                  {user?.createdAt ? new Date(user.createdAt).toLocaleDateString() : 'N/A'}
-                </span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-neutral-600">Last Updated</span>
-                <span className="font-medium text-neutral-900">
-                  {user?.updatedAt ? new Date(user.updatedAt).toLocaleDateString() : 'N/A'}
-                </span>
-              </div>
-            </div>
-          </div>
+
         </div>
       </div>
     </div>

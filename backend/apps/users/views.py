@@ -30,6 +30,43 @@ class UserRegistrationView(generics.CreateAPIView):
     serializer_class = UserSerializer
     permission_classes = [AllowAny] # Anyone can access this view to register
 
+    def create(self, request, *args, **kwargs):
+        # Check if OTP was verified for this email
+        email = request.data.get('email')
+        if not request.session.get('otp_verified') or request.session.get('registration_email') != email:
+            return Response(
+                {"error": "Please verify your OTP before registration."}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        # Proceed with registration
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        user = serializer.save()
+        
+        # Generate JWT tokens
+        refresh = RefreshToken.for_user(user)
+        
+        # Clear OTP session data after successful registration
+        request.session.pop('otp_verified', None)
+        request.session.pop('registration_email', None)
+        request.session.pop('otp', None)
+        request.session.pop('otp_email', None)
+        request.session.pop('otp_time', None)
+        
+        # Return response with tokens and user data
+        return Response({
+            'refresh': str(refresh),
+            'access': str(refresh.access_token),
+            'user': {
+                'id': user.id,
+                'email': user.email,
+                'first_name': user.first_name,
+                'last_name': user.last_name,
+                'role': 'user',  # New registrations are always regular users
+            }
+        }, status=status.HTTP_201_CREATED)
+
 class UserLoginView(APIView):
     """
     Handles user login and returns JWT tokens.
@@ -55,6 +92,13 @@ class UserLoginView(APIView):
 
             # Generate JWT tokens
             refresh = RefreshToken.for_user(user)
+            
+            # Determine user role
+            if user.is_superuser or user.is_staff:
+                role = 'admin'
+            else:
+                role = 'user'
+            
             return Response({
                 'refresh': str(refresh),
                 'access': str(refresh.access_token),
@@ -63,6 +107,7 @@ class UserLoginView(APIView):
                     'email': user.email,
                     'first_name': user.first_name,
                     'last_name': user.last_name,
+                    'role': role,
                 }
             }, status=status.HTTP_200_OK)
         
@@ -153,10 +198,11 @@ def verify_otp(request):
     if email != stored_email or str(otp_entered) != str(stored_otp):
         return Response({"error": "Invalid OTP."}, status=status.HTTP_400_BAD_REQUEST)
     
-    # Mark OTP as verified for the next step (password reset)
+    # Mark OTP as verified for registration
     request.session['otp_verified'] = True
+    request.session['registration_email'] = email
     
-    return Response({"message": "OTP verified successfully. You can now reset your password."})
+    return Response({"message": "OTP verified successfully."})
 
 
 @api_view(['POST'])

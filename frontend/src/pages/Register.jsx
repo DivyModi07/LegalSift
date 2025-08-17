@@ -19,7 +19,7 @@ const Register = () => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [errors, setErrors] = useState({});
   
-  const { register, sendOTP, verifyOTP, isLoading, isVerifyingOTP } = useAuthStore();
+  const { register, sendOTP, verifyOTP, checkEmailPhone, isLoading, isVerifyingOTP } = useAuthStore();
   const navigate = useNavigate();
 
   const validateStep1 = () => {
@@ -89,16 +89,28 @@ const Register = () => {
 
   const handleNext = async () => {
     if (step === 1 && validateStep1()) {
-      // Send OTP before moving to step 2
+      // Check email and phone availability first
+      const checkResult = await checkEmailPhone(formData.email, formData.phone);
+      if (checkResult.success) {
+        setStep(2);
+      } else {
+        // Show validation errors
+        if (checkResult.error.email) {
+          setErrors(prev => ({ ...prev, email: checkResult.error.email }));
+        }
+        if (checkResult.error.phone) {
+          setErrors(prev => ({ ...prev, phone: checkResult.error.phone }));
+        }
+      }
+    } else if (step === 2 && validateStep2()) {
+      // Send OTP when moving from step 2 to step 3
       const result = await sendOTP(formData.email);
       if (result.success) {
         toast.success('OTP sent to your email!');
-        setStep(2);
+        setStep(3);
       } else {
         toast.error(result.error || 'Failed to send OTP');
       }
-    } else if (step === 2 && validateStep2()) {
-      setStep(3);
     }
   };
 
@@ -106,34 +118,39 @@ const Register = () => {
     setStep(step - 1);
   };
 
-  const handleSubmit = async (e) => {
+    const handleSubmit = async (e) => {
     e.preventDefault();
     
     if (!validateStep3()) {
       return;
     }
     
-    const result = await verifyOTP(formData.email, formData.otp);
+    // First verify OTP
+    const otpResult = await verifyOTP(formData.email, formData.otp);
     
-    if (result.success) {
-      // Complete registration
+    if (otpResult.success) {
+      // Then complete registration
       const registrationData = {
-        name: `${formData.firstName} ${formData.lastName}`,
+        first_name: formData.firstName,
+        last_name: formData.lastName,
         email: formData.email,
-        phone: formData.phone,
+        phone_number: formData.phone,
         password: formData.password,
       };
       
       const registerResult = await register(registrationData);
       
       if (registerResult.success) {
-        toast.success('Registration successful!');
-        navigate('/dashboard');
+        toast.success('🎉 Registration successful! Welcome to LegalSift!');
+        // Small delay to show the success message before redirecting
+        setTimeout(() => {
+          navigate('/dashboard');
+        }, 1500);
       } else {
         toast.error(registerResult.error || 'Registration failed');
       }
     } else {
-      toast.error(result.error || 'Invalid OTP');
+      toast.error(otpResult.error || 'Invalid OTP');
     }
   };
 
@@ -308,24 +325,24 @@ const Register = () => {
                   )}
                 </div>
 
-                <button
-                  type="button"
-                  onClick={handleNext}
-                  disabled={isLoading}
-                  className="btn btn-primary w-full py-3"
-                >
-                  {isLoading ? (
-                    <div className="flex items-center justify-center">
-                      <div className="spinner h-5 w-5 mr-2"></div>
-                      Sending OTP...
-                    </div>
-                  ) : (
-                    <div className="flex items-center justify-center">
-                      Next
-                      <ArrowRight className="ml-2 h-4 w-4" />
-                    </div>
-                  )}
-                </button>
+                                 <button
+                   type="button"
+                   onClick={handleNext}
+                   disabled={isLoading}
+                   className="btn btn-primary w-full py-3"
+                 >
+                   {isLoading ? (
+                     <div className="flex items-center justify-center">
+                       <div className="spinner h-5 w-5 mr-2"></div>
+                       Checking...
+                     </div>
+                   ) : (
+                     <div className="flex items-center justify-center">
+                       Next
+                       <ArrowRight className="ml-2 h-4 w-4" />
+                     </div>
+                   )}
+                 </button>
               </>
             )}
 
@@ -412,14 +429,24 @@ const Register = () => {
                   >
                     Previous
                   </button>
-                  <button
-                    type="button"
-                    onClick={handleNext}
-                    className="btn btn-primary flex-1 py-3"
-                  >
-                    Next
-                    <ArrowRight className="ml-2 h-4 w-4" />
-                  </button>
+                                     <button
+                     type="button"
+                     onClick={handleNext}
+                     disabled={isVerifyingOTP}
+                     className="btn btn-primary flex-1 py-3"
+                   >
+                     {isVerifyingOTP ? (
+                       <div className="flex items-center justify-center">
+                         <div className="spinner h-5 w-5 mr-2"></div>
+                         Sending OTP...
+                       </div>
+                     ) : (
+                       <div className="flex items-center justify-center">
+                         Send OTP
+                         <ArrowRight className="ml-2 h-4 w-4" />
+                       </div>
+                     )}
+                   </button>
                 </div>
               </>
             )}
@@ -427,11 +454,14 @@ const Register = () => {
             {/* Step 3: OTP Verification */}
             {step === 3 && (
               <>
-                <div className="text-center">
-                  <p className="text-neutral-600 mb-4">
-                    We've sent a 6-digit verification code to <strong>{formData.email}</strong>
-                  </p>
-                </div>
+                                 <div className="text-center">
+                   <p className="text-neutral-600 mb-4">
+                     We've sent a 6-digit verification code to <strong>{formData.email}</strong>
+                   </p>
+                   <p className="text-sm text-neutral-500 mb-4">
+                     Please check your email and enter the code below to complete your registration.
+                   </p>
+                 </div>
 
                 <div>
                   <label htmlFor="otp" className="form-label">
@@ -477,14 +507,14 @@ const Register = () => {
                     disabled={isLoading}
                     className="btn btn-primary flex-1 py-3"
                   >
-                    {isLoading ? (
-                      <div className="flex items-center justify-center">
-                        <div className="spinner h-5 w-5 mr-2"></div>
-                        Creating Account...
-                      </div>
-                    ) : (
-                      'Create Account'
-                    )}
+                                         {isLoading ? (
+                       <div className="flex items-center justify-center">
+                         <div className="spinner h-5 w-5 mr-2"></div>
+                         Creating Account...
+                       </div>
+                     ) : (
+                       'Complete Registration'
+                     )}
                   </button>
                 </div>
               </>
