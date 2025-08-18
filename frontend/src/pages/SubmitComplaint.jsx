@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   FileText, 
@@ -9,15 +9,19 @@ import {
   Shield,
   ArrowLeft,
   Send,
-  Loader
+  Loader,
+  ChevronDown,
+  ChevronUp
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import useAuthStore from '../store/authStore';
+import complaintService from '../services/complaintService';
 
 const SubmitComplaint = () => {
   const { user } = useAuthStore();
   const navigate = useNavigate();
-  
+  const topRef = useRef(null); // Ref for the scroll target
+
   const [formData, setFormData] = useState({
     state: '',
     city: '',
@@ -27,6 +31,7 @@ const SubmitComplaint = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [analysisResult, setAnalysisResult] = useState(null);
   const [showResult, setShowResult] = useState(false);
+  const [expandedSection, setExpandedSection] = useState(null);
 
   const states = [
     'Andhra Pradesh', 'Arunachal Pradesh', 'Assam', 'Bihar', 'Chhattisgarh',
@@ -39,19 +44,6 @@ const SubmitComplaint = () => {
     'Daman and Diu', 'Lakshadweep', 'Puducherry', 'Andaman and Nicobar Islands'
   ];
 
-  const cities = {
-    'Maharashtra': ['Mumbai', 'Pune', 'Nagpur', 'Thane', 'Nashik', 'Aurangabad', 'Solapur', 'Kolhapur'],
-    'Delhi': ['New Delhi', 'North Delhi', 'South Delhi', 'East Delhi', 'West Delhi', 'Central Delhi'],
-    'Karnataka': ['Bangalore', 'Mysore', 'Hubli', 'Mangalore', 'Belgaum', 'Gulbarga'],
-    'Tamil Nadu': ['Chennai', 'Coimbatore', 'Madurai', 'Salem', 'Tiruchirappalli', 'Vellore'],
-    'Gujarat': ['Ahmedabad', 'Surat', 'Vadodara', 'Rajkot', 'Bhavnagar', 'Jamnagar'],
-    'Uttar Pradesh': ['Lucknow', 'Kanpur', 'Varanasi', 'Agra', 'Prayagraj', 'Ghaziabad'],
-    'West Bengal': ['Kolkata', 'Howrah', 'Durgapur', 'Asansol', 'Siliguri', 'Bardhaman'],
-    'Telangana': ['Hyderabad', 'Warangal', 'Karimnagar', 'Nizamabad', 'Khammam', 'Adilabad'],
-    'Kerala': ['Thiruvananthapuram', 'Kochi', 'Kozhikode', 'Thrissur', 'Kollam', 'Alappuzha'],
-    'Punjab': ['Chandigarh', 'Ludhiana', 'Amritsar', 'Jalandhar', 'Patiala', 'Bathinda']
-  };
-
   const validateForm = () => {
     const newErrors = {};
     
@@ -59,8 +51,8 @@ const SubmitComplaint = () => {
       newErrors.state = 'Please select your state';
     }
     
-    if (!formData.city) {
-      newErrors.city = 'Please select your city';
+    if (!formData.city.trim()) {
+      newErrors.city = 'Please enter your city';
     }
     
     if (!formData.complaint.trim()) {
@@ -81,85 +73,31 @@ const SubmitComplaint = () => {
     }
     
     setIsSubmitting(true);
+    setAnalysisResult(null); 
+    setShowResult(false);
     
-    // Simulate AI analysis
-    setTimeout(() => {
-      const mockAnalysis = generateMockAnalysis(formData.complaint);
-      setAnalysisResult(mockAnalysis);
+    try {
+      const response = await complaintService.submitComplaintForAnalysis(formData.complaint);
+      
+      const formattedResult = {
+        urgency: response.predicted_urgency,
+        category: response.predicted_category,
+        sections: response.recommended_sections,
+      };
+      
+      setAnalysisResult(formattedResult);
       setShowResult(true);
-      setIsSubmitting(false);
       toast.success('Complaint analyzed successfully!');
-    }, 3000);
-  };
 
-  const generateMockAnalysis = (complaint) => {
-    const complaintLower = complaint.toLowerCase();
-    
-    // Simple keyword-based analysis
-    if (complaintLower.includes('fraud') || complaintLower.includes('scam') || complaintLower.includes('cheat')) {
-      return {
-        section: '420',
-        title: 'Cheating and Dishonestly Inducing Delivery of Property',
-        description: 'This involves cheating and dishonestly inducing a person to deliver any property or valuable security.',
-        category: 'Fraud',
-        punishment: 'Imprisonment up to 7 years and fine',
-        bailable: 'Non-bailable',
-        urgency: 'high',
-        jurisdiction: 'Local Police Station',
-        recommendation: 'Contact nearest police station immediately. This is a serious offense.',
-        lawyers: [
-          { name: 'Adv. Rajesh Kumar', phone: '+91 9876543210', fees: '₹5,000', experience: '15 years' },
-          { name: 'Adv. Priya Sharma', phone: '+91 9876543211', fees: '₹4,500', experience: '12 years' },
-          { name: 'Adv. Amit Patel', phone: '+91 9876543212', fees: '₹6,000', experience: '18 years' }
-        ]
-      };
-    } else if (complaintLower.includes('theft') || complaintLower.includes('steal') || complaintLower.includes('robbery')) {
-      return {
-        section: '379',
-        title: 'Theft',
-        description: 'Whoever commits theft shall be punished with imprisonment.',
-        category: 'Theft',
-        punishment: 'Imprisonment up to 3 years, or fine, or both',
-        bailable: 'Bailable',
-        urgency: 'medium',
-        jurisdiction: 'Local Police Station',
-        recommendation: 'File an FIR at your nearest police station.',
-        lawyers: [
-          { name: 'Adv. Suresh Verma', phone: '+91 9876543213', fees: '₹3,500', experience: '10 years' },
-          { name: 'Adv. Meera Singh', phone: '+91 9876543214', fees: '₹4,000', experience: '14 years' }
-        ]
-      };
-    } else if (complaintLower.includes('harassment') || complaintLower.includes('molest') || complaintLower.includes('assault')) {
-      return {
-        section: '354',
-        title: 'Assault or Criminal Force to Woman with Intent to Outrage her Modesty',
-        description: 'Whoever assaults or uses criminal force to any woman intending to outrage or knowing it to be likely that he will thereby outrage her modesty.',
-        category: 'Harassment',
-        punishment: 'Imprisonment up to 2 years, or fine, or both',
-        bailable: 'Bailable',
-        urgency: 'high',
-        jurisdiction: 'Local Police Station',
-        recommendation: 'Contact nearest police station immediately. This is a serious offense.',
-        lawyers: [
-          { name: 'Adv. Kavita Reddy', phone: '+91 9876543215', fees: '₹5,500', experience: '16 years' },
-          { name: 'Adv. Sunil Kumar', phone: '+91 9876543216', fees: '₹4,800', experience: '13 years' }
-        ]
-      };
-    } else {
-      return {
-        section: 'General',
-        title: 'General Legal Matter',
-        description: 'This appears to be a general legal matter that may require consultation with a legal expert.',
-        category: 'General',
-        punishment: 'Varies based on specific circumstances',
-        bailable: 'Depends on offense',
-        urgency: 'low',
-        jurisdiction: 'Local Police Station',
-        recommendation: 'Contact nearest police station for guidance.',
-        lawyers: [
-          { name: 'Adv. General Counsel', phone: '+91 9876543217', fees: '₹3,000', experience: '8 years' }
-        ]
-      };
+      // Scroll to the top of the page after a successful submission
+      if (topRef.current) {
+        topRef.current.scrollIntoView({ behavior: 'smooth' });
+      }
+    } catch (error) {
+      console.error('Error submitting complaint:', error);
+      toast.error('Failed to analyze complaint. Please try again.');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -170,16 +108,6 @@ const SubmitComplaint = () => {
       [name]: value
     }));
     
-    // Clear city when state changes
-    if (name === 'state') {
-      setFormData(prev => ({
-        ...prev,
-        state: value,
-        city: ''
-      }));
-    }
-    
-    // Clear error when user starts typing
     if (errors[name]) {
       setErrors(prev => ({
         ...prev,
@@ -206,11 +134,15 @@ const SubmitComplaint = () => {
     }
   };
 
+  const toggleDetails = (sectionId) => {
+    setExpandedSection(expandedSection === sectionId ? null : sectionId);
+  };
+
   return (
     <div className="min-h-screen bg-neutral-50">
       <div className="container-max py-8">
-        {/* Header */}
-        <div className="mb-8">
+        {/* Header - This is the scroll target */}
+        <div className="mb-8" ref={topRef}>
           <button
             onClick={() => navigate(-1)}
             className="inline-flex items-center text-primary-600 hover:text-primary-500 mb-4"
@@ -264,26 +196,20 @@ const SubmitComplaint = () => {
                 )}
               </div>
 
-              {/* City Selection */}
+              {/* City Text Field */}
               <div>
                 <label htmlFor="city" className="form-label">
                   City
                 </label>
-                <select
+                <input
+                  type="text"
                   id="city"
                   name="city"
+                  placeholder="Enter your city"
                   value={formData.city}
                   onChange={handleChange}
-                  disabled={!formData.state}
                   className={`form-input ${errors.city ? 'border-error' : ''}`}
-                >
-                  <option value="">Select your city</option>
-                  {formData.state && cities[formData.state]?.map((city) => (
-                    <option key={city} value={city}>
-                      {city}
-                    </option>
-                  ))}
-                </select>
+                />
                 {errors.city && (
                   <p className="form-error">{errors.city}</p>
                 )}
@@ -346,27 +272,14 @@ const SubmitComplaint = () => {
                 </div>
 
                 <div className="space-y-4">
-                  {/* IPC Section */}
-                  <div className="bg-primary-50 p-4 rounded-lg">
-                    <h3 className="font-semibold text-primary-900 mb-2">
-                      IPC Section {analysisResult.section}
-                    </h3>
-                    <p className="text-primary-800 font-medium">
-                      {analysisResult.title}
-                    </p>
-                    <p className="text-primary-700 text-sm mt-1">
-                      {analysisResult.description}
-                    </p>
-                  </div>
-
                   {/* Category and Urgency */}
                   <div className="grid grid-cols-2 gap-4">
                     <div className="bg-neutral-50 p-3 rounded-lg">
-                      <p className="text-sm text-neutral-600">Category</p>
+                      <p className="text-sm text-neutral-600">Predicted Category</p>
                       <p className="font-semibold text-neutral-900">{analysisResult.category}</p>
                     </div>
                     <div className="bg-neutral-50 p-3 rounded-lg">
-                      <p className="text-sm text-neutral-600">Urgency</p>
+                      <p className="text-sm text-neutral-600">Predicted Urgency</p>
                       <div className={`flex items-center font-semibold ${getUrgencyColor(analysisResult.urgency)}`}>
                         {getUrgencyIcon(analysisResult.urgency)}
                         <span className="ml-1 capitalize">{analysisResult.urgency}</span>
@@ -374,58 +287,71 @@ const SubmitComplaint = () => {
                     </div>
                   </div>
 
-                  {/* Punishment and Bailability */}
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="bg-neutral-50 p-3 rounded-lg">
-                      <p className="text-sm text-neutral-600">Punishment</p>
-                      <p className="font-semibold text-neutral-900">{analysisResult.punishment}</p>
-                    </div>
-                    <div className="bg-neutral-50 p-3 rounded-lg">
-                      <p className="text-sm text-neutral-600">Bailability</p>
-                      <p className="font-semibold text-neutral-900">{analysisResult.bailable}</p>
-                    </div>
-                  </div>
+                  {/* Recommended Sections */}
+                  <div className="bg-primary-50 p-4 rounded-lg">
+                    <h3 className="font-semibold text-primary-900 mb-2">
+                      Recommended IPC Sections
+                    </h3>
+                    {analysisResult.sections.map((section, index) => (
+                      <div key={index} className="mb-3 last:mb-0 p-3 border rounded-lg bg-white border-primary-100">
+                        <p className="text-primary-800 font-medium">
+                          Section {section.section_number}: {section.title}
+                        </p>
+                        <p className="text-primary-700 text-sm mt-1">
+                          {section.short_description}
+                        </p>
+                        
+                        {/* View Details Button */}
+                        <div className="mt-4 border-t border-neutral-200 pt-4">
+                          <button
+                            onClick={() => toggleDetails(section.section_number)}
+                            className="flex items-center justify-between w-full text-primary-600 hover:text-primary-500 font-medium transition-colors"
+                          >
+                            <span>
+                              {expandedSection === section.section_number ? 'Hide Details' : 'View Details'}
+                            </span>
+                            {expandedSection === section.section_number ? (
+                              <ChevronUp className="h-4 w-4 ml-2" />
+                            ) : (
+                              <ChevronDown className="h-4 w-4 ml-2" />
+                            )}
+                          </button>
 
-                  {/* Recommendation */}
-                  <div className="bg-amber-50 border border-amber-200 p-4 rounded-lg">
-                    <h4 className="font-semibold text-amber-800 mb-2">Recommendation</h4>
-                    <p className="text-amber-700">{analysisResult.recommendation}</p>
-                  </div>
-
-                  {/* Lawyer Recommendations for High Urgency */}
-                  {analysisResult.urgency === 'high' && analysisResult.lawyers && (
-                    <div className="bg-green-50 border border-green-200 p-4 rounded-lg">
-                      <h4 className="font-semibold text-green-800 mb-3">Recommended Lawyers</h4>
-                      <div className="space-y-3">
-                        {analysisResult.lawyers.map((lawyer, index) => (
-                          <div key={index} className="bg-white p-3 rounded border border-green-200">
-                            <div className="flex justify-between items-start mb-2">
-                              <h5 className="font-medium text-green-900">{lawyer.name}</h5>
-                              <span className="text-sm font-medium text-green-700">{lawyer.fees}</span>
+                          {/* Collapsible Details Content */}
+                          {expandedSection === section.section_number && (
+                            <div className="mt-4 space-y-3 p-4 bg-neutral-50 rounded-lg">
+                               <div className="bg-white p-3 rounded-lg">
+                                  <p className="text-sm text-neutral-600 mb-1">Punishment</p>
+                                  <p className="font-medium text-neutral-900 text-sm">{section.punishment}</p>
+                              </div>
+                              <div className="bg-white p-3 rounded-lg">
+                                  <p className="text-sm text-neutral-600 mb-1">Bailability</p>
+                                  <p className="font-medium text-neutral-900 text-sm">{section.bailability_status}</p>
+                              </div>
+                              <div className="bg-white p-3 rounded-lg">
+                                  <p className="text-sm text-neutral-600 mb-1">Court</p>
+                                  <p className="font-medium text-neutral-900 text-sm">{section.court_jurisdiction}</p>
+                              </div>
                             </div>
-                            <div className="text-sm text-green-700 space-y-1">
-                              <p>Phone: {lawyer.phone}</p>
-                              <p>Experience: {lawyer.experience}</p>
-                            </div>
-                          </div>
-                        ))}
+                          )}
+                        </div>
                       </div>
-                    </div>
-                  )}
+                    ))}
+                  </div>
+
+                  {/* Information Box */}
+                  <div className="card p-6 bg-blue-50 border-blue-200">
+                    <h3 className="font-semibold text-blue-900 mb-3">Important Information</h3>
+                    <ul className="text-blue-800 text-sm space-y-2">
+                      <li>• This analysis is for informational purposes only</li>
+                      <li>• For legal advice, consult a qualified lawyer</li>
+                      <li>• In emergencies, contact your nearest police station immediately</li>
+                      <li>• Keep all relevant documents and evidence safe</li>
+                    </ul>
+                  </div>
                 </div>
               </div>
             )}
-
-            {/* Information Box */}
-            <div className="card p-6 bg-blue-50 border-blue-200">
-              <h3 className="font-semibold text-blue-900 mb-3">Important Information</h3>
-              <ul className="text-blue-800 text-sm space-y-2">
-                <li>• This analysis is for informational purposes only</li>
-                <li>• For legal advice, consult a qualified lawyer</li>
-                <li>• In emergencies, contact your nearest police station immediately</li>
-                <li>• Keep all relevant documents and evidence safe</li>
-              </ul>
-            </div>
           </div>
         </div>
       </div>

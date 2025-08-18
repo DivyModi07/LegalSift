@@ -5,41 +5,35 @@ import api from '../services/api';
 const IPCExplorer = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
-  const [loading, setLoading] = useState(true); // Stays true until timeout
+  const [loading, setLoading] = useState(true);
   const [sections, setSections] = useState([]);
   const [filteredSections, setFilteredSections] = useState([]);
   const [categories, setCategories] = useState(['all']);
   const [expandedSection, setExpandedSection] = useState(null);
 
+  // This useEffect now mirrors the loading logic in UserDashboard.jsx
   useEffect(() => {
-    // --- THIS IS THE MODIFIED LOADING LOGIC ---
-    // 1. Set a timer to ensure the loading spinner shows for at least 1 second.
-    const timer = setTimeout(() => {
-      setLoading(false);
-    }, 1000); // 1000 milliseconds = 1 second
-
     const fetchIpcData = async () => {
       try {
-        // 2. Fetch data in the background. Note that setLoading is no longer here.
         const response = await api.get('/ml/ipc/');
         const data = response.data;
         setSections(data);
         setFilteredSections(data);
-
         const uniqueCategories = [...new Set(data.map(section => section.mapped_category))];
         setCategories(['all', ...uniqueCategories]);
       } catch (error) {
         console.error("Failed to fetch IPC sections:", error);
-        // If there's an error, we should still stop loading
+      } finally {
         setLoading(false);
       }
     };
 
-    fetchIpcData();
-
-    // 3. Cleanup the timer if the component unmounts
+    // A single timer handles the loading state
+    const timer = setTimeout(() => {
+      fetchIpcData();
+    }, 1000); 
     return () => clearTimeout(timer);
-  }, []); // The empty dependency array ensures this runs only once on mount
+  }, []);
 
   useEffect(() => {
     const applyFilters = () => {
