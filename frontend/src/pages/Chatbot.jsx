@@ -1,5 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { Send, Bot, User, Loader, MessageSquare } from 'lucide-react';
+import api from '../services/api';
+import { toast } from 'react-hot-toast';
 
 const Chatbot = () => {
   const [messages, setMessages] = useState([
@@ -7,12 +9,21 @@ const Chatbot = () => {
       id: 1,
       type: 'bot',
       content: 'Hello! I\'m your legal assistant. I can help you with questions about Indian law, IPC sections, and general legal guidance. How can I assist you today?',
-      timestamp: new Date()
+      timestamp: new Date(),
+      sources: []
     }
   ]);
   const [inputMessage, setInputMessage] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const messagesEndRef = useRef(null);
+  const [loading, setLoading] = useState(true);
+
+  // Simulating the loading state on page load
+  useEffect(() => {
+    setTimeout(() => {
+      setLoading(false);
+    }, 1000);
+  }, []);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -21,58 +32,6 @@ const Chatbot = () => {
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
-
-  const generateBotResponse = (userMessage) => {
-    const message = userMessage.toLowerCase();
-    
-    // Simple keyword-based responses
-    if (message.includes('fraud') || message.includes('cheat') || message.includes('scam')) {
-      return {
-        content: 'Fraud cases typically fall under IPC Section 420 (Cheating and Dishonestly Inducing Delivery of Property). This is a serious offense with imprisonment up to 7 years and fine. For immediate assistance, contact your nearest police station.',
-        suggestions: ['What is IPC Section 420?', 'How to file a fraud complaint?', 'What documents do I need?']
-      };
-    } else if (message.includes('theft') || message.includes('steal')) {
-      return {
-        content: 'Theft is covered under IPC Section 379. It involves dishonestly taking any movable property out of the possession of any person without their consent. The punishment is imprisonment up to 3 years, or fine, or both.',
-        suggestions: ['What is IPC Section 379?', 'How to report theft?', 'What is the punishment for theft?']
-      };
-    } else if (message.includes('harassment') || message.includes('molest')) {
-      return {
-        content: 'Harassment and molestation cases are serious offenses. IPC Section 354 covers assault or criminal force to woman with intent to outrage her modesty. The punishment is imprisonment up to 2 years, or fine, or both.',
-        suggestions: ['What is IPC Section 354?', 'How to file harassment complaint?', 'What are my rights?']
-      };
-    } else if (message.includes('murder') || message.includes('kill')) {
-      return {
-        content: 'Murder is the most serious offense under IPC Section 302. The punishment is death or imprisonment for life, and fine. This is a non-bailable and cognizable offense.',
-        suggestions: ['What is IPC Section 302?', 'What is the difference between murder and culpable homicide?', 'What are the defenses available?']
-      };
-    } else if (message.includes('cyber') || message.includes('online') || message.includes('internet')) {
-      return {
-        content: 'Cyber crimes are covered under the Information Technology Act, 2000. Common offenses include identity theft (Section 66C), cyber fraud, and online harassment. These are serious offenses with specific punishments.',
-        suggestions: ['What is cyber crime?', 'How to report cyber crime?', 'What is Section 66C?']
-      };
-    } else if (message.includes('property') || message.includes('land') || message.includes('house')) {
-      return {
-        content: 'Property disputes can involve various laws including the Transfer of Property Act, 1882, and specific IPC sections depending on the nature of the dispute. It\'s advisable to consult a property lawyer for specific guidance.',
-        suggestions: ['What are property rights?', 'How to resolve property disputes?', 'What documents are needed?']
-      };
-    } else if (message.includes('police') || message.includes('fir') || message.includes('complaint')) {
-      return {
-        content: 'To file a police complaint, visit your nearest police station. For cognizable offenses, police must register an FIR. For non-cognizable offenses, you may need to approach the magistrate. Always carry relevant documents and evidence.',
-        suggestions: ['What is an FIR?', 'What documents do I need?', 'What are cognizable offenses?']
-      };
-    } else if (message.includes('lawyer') || message.includes('advocate') || message.includes('legal help')) {
-      return {
-        content: 'For legal representation, you can contact the Bar Council of India or local bar associations. Many lawyers offer free initial consultations. You can also approach legal aid services if you cannot afford a lawyer.',
-        suggestions: ['How to find a good lawyer?', 'What are legal aid services?', 'How much do lawyers charge?']
-      };
-    } else {
-      return {
-        content: 'I understand you have a legal question. While I can provide general information about Indian law, for specific legal advice, it\'s best to consult a qualified lawyer. You can also explore our IPC Explorer for detailed information about specific sections.',
-        suggestions: ['Tell me about IPC sections', 'How to file a complaint?', 'What are my legal rights?']
-      };
-    }
-  };
 
   const handleSendMessage = async () => {
     if (!inputMessage.trim()) return;
@@ -88,20 +47,34 @@ const Chatbot = () => {
     setInputMessage('');
     setIsTyping(true);
 
-    // Simulate bot thinking
-    setTimeout(() => {
-      const botResponse = generateBotResponse(inputMessage);
+    try {
+      const response = await api.post('/ml/chat/', { query: inputMessage });
+      const { answer } = response.data;
+
       const botMessage = {
         id: Date.now() + 1,
         type: 'bot',
-        content: botResponse.content,
-        suggestions: botResponse.suggestions,
+        content: answer,
         timestamp: new Date()
       };
-
+      
       setMessages(prev => [...prev, botMessage]);
+
+    } catch (error) {
+      console.error('Failed to get bot response:', error);
+      toast.error('Failed to get a response. Please try again later.');
+
+      const errorMessage = {
+        id: Date.now() + 1,
+        type: 'bot',
+        content: "I'm sorry, I encountered an error while processing your request. Please try again.",
+        timestamp: new Date()
+      };
+      setMessages(prev => [...prev, errorMessage]);
+
+    } finally {
       setIsTyping(false);
-    }, 1500);
+    }
   };
 
   const handleSuggestionClick = (suggestion) => {
@@ -114,6 +87,14 @@ const Chatbot = () => {
       handleSendMessage();
     }
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-neutral-50 flex items-center justify-center">
+        <div className="spinner h-8 w-8"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-neutral-50">
@@ -166,22 +147,6 @@ const Chatbot = () => {
                           : 'bg-neutral-100 text-neutral-900'
                       }`}>
                         <p className="text-sm leading-relaxed">{message.content}</p>
-                        {message.suggestions && (
-                          <div className="mt-3 space-y-2">
-                            <p className="text-xs opacity-75">Suggested questions:</p>
-                            <div className="flex flex-wrap gap-2">
-                              {message.suggestions.map((suggestion, index) => (
-                                <button
-                                  key={index}
-                                  onClick={() => handleSuggestionClick(suggestion)}
-                                  className="text-xs px-2 py-1 bg-white/20 rounded hover:bg-white/30 transition-colors"
-                                >
-                                  {suggestion}
-                                </button>
-                              ))}
-                            </div>
-                          </div>
-                        )}
                       </div>
                     </div>
                     <p className={`text-xs mt-1 ${message.type === 'user' ? 'text-right' : 'text-left'} text-neutral-500`}>
@@ -234,29 +199,6 @@ const Chatbot = () => {
                   <Send className="h-4 w-4" />
                 </button>
               </div>
-            </div>
-          </div>
-
-          {/* Quick Questions */}
-          <div className="mt-6 card p-6">
-            <h3 className="font-semibold text-neutral-900 mb-4">Quick Questions</h3>
-            <div className="grid md:grid-cols-2 gap-3">
-              {[
-                'What is IPC Section 420?',
-                'How to file a police complaint?',
-                'What are my rights if I am arrested?',
-                'How to report cyber crime?',
-                'What is the punishment for theft?',
-                'How to find a good lawyer?'
-              ].map((question, index) => (
-                <button
-                  key={index}
-                  onClick={() => handleSuggestionClick(question)}
-                  className="text-left p-3 bg-neutral-50 hover:bg-neutral-100 rounded-lg transition-colors text-sm"
-                >
-                  {question}
-                </button>
-              ))}
             </div>
           </div>
 
