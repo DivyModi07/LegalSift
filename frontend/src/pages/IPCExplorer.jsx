@@ -1,39 +1,45 @@
 import { useState, useEffect } from 'react';
-import { Search, BookOpen, Filter, FileText, Shield, ChevronDown, ChevronUp } from 'lucide-react';
+import { Search, BookOpen, Filter, FileText, Shield, ChevronDown, ChevronUp, Loader } from 'lucide-react';
 import api from '../services/api';
 
 const IPCExplorer = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(true); // Stays true until timeout
   const [sections, setSections] = useState([]);
   const [filteredSections, setFilteredSections] = useState([]);
   const [categories, setCategories] = useState(['all']);
   const [expandedSection, setExpandedSection] = useState(null);
 
   useEffect(() => {
+    // --- THIS IS THE MODIFIED LOADING LOGIC ---
+    // 1. Set a timer to ensure the loading spinner shows for at least 1 second.
+    const timer = setTimeout(() => {
+      setLoading(false);
+    }, 1000); // 1000 milliseconds = 1 second
+
     const fetchIpcData = async () => {
       try {
-        setLoading(true);
+        // 2. Fetch data in the background. Note that setLoading is no longer here.
         const response = await api.get('/ml/ipc/');
         const data = response.data;
         setSections(data);
         setFilteredSections(data);
 
-        // Extract unique categories from the fetched data
         const uniqueCategories = [...new Set(data.map(section => section.mapped_category))];
         setCategories(['all', ...uniqueCategories]);
-
-        setLoading(false);
       } catch (error) {
         console.error("Failed to fetch IPC sections:", error);
+        // If there's an error, we should still stop loading
         setLoading(false);
-        // Handle error state appropriately
       }
     };
 
     fetchIpcData();
-  }, []);
+
+    // 3. Cleanup the timer if the component unmounts
+    return () => clearTimeout(timer);
+  }, []); // The empty dependency array ensures this runs only once on mount
 
   useEffect(() => {
     const applyFilters = () => {
@@ -55,7 +61,7 @@ const IPCExplorer = () => {
   if (loading) {
     return (
       <div className="min-h-screen bg-neutral-50 flex items-center justify-center">
-        <div className="spinner h-8 w-8"></div>
+        <Loader className="h-8 w-8 animate-spin text-primary-600" />
       </div>
     );
   }

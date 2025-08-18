@@ -8,30 +8,39 @@ const Chatbot = () => {
     {
       id: 1,
       type: 'bot',
-      content: 'Hello! I\'m your legal assistant. I can help you with questions about Indian law, IPC sections, and general legal guidance. How can I assist you today?',
+      content: "Hello! I'm your legal assistant. How can I assist you today with the Indian Penal Code?",
       timestamp: new Date(),
-      sources: []
-    }
+    },
   ]);
   const [inputMessage, setInputMessage] = useState('');
   const [isTyping, setIsTyping] = useState(false);
-  const messagesEndRef = useRef(null);
+  
+  // --- Refs for Scrolling ---
+  const messagesEndRef = useRef(null); // Ref for the empty div at the end
+  const chatContainerRef = useRef(null); // **NEW**: Ref for the scrollable chat container
+
   const [loading, setLoading] = useState(true);
 
-  // Simulating the loading state on page load
   useEffect(() => {
-    setTimeout(() => {
+    const timer = setTimeout(() => {
       setLoading(false);
     }, 1000);
+    return () => clearTimeout(timer);
   }, []);
 
+  // --- CORRECTED SCROLLING LOGIC ---
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    if (chatContainerRef.current) {
+      // **NEW**: We now scroll the container itself, not the whole window
+      chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+    }
   };
 
   useEffect(() => {
+    // This effect runs every time a new message is added
     scrollToBottom();
   }, [messages]);
+  // ---------------------------------------------
 
   const handleSendMessage = async () => {
     if (!inputMessage.trim()) return;
@@ -40,10 +49,10 @@ const Chatbot = () => {
       id: Date.now(),
       type: 'user',
       content: inputMessage,
-      timestamp: new Date()
+      timestamp: new Date(),
     };
 
-    setMessages(prev => [...prev, userMessage]);
+    setMessages((prev) => [...prev, userMessage]);
     setInputMessage('');
     setIsTyping(true);
 
@@ -54,11 +63,11 @@ const Chatbot = () => {
       const botMessage = {
         id: Date.now() + 1,
         type: 'bot',
-        content: answer,
-        timestamp: new Date()
+        content: answer || "I'm sorry, I could not find an answer.",
+        timestamp: new Date(),
       };
       
-      setMessages(prev => [...prev, botMessage]);
+      setMessages((prev) => [...prev, botMessage]);
 
     } catch (error) {
       console.error('Failed to get bot response:', error);
@@ -67,18 +76,14 @@ const Chatbot = () => {
       const errorMessage = {
         id: Date.now() + 1,
         type: 'bot',
-        content: "I'm sorry, I encountered an error while processing your request. Please try again.",
-        timestamp: new Date()
+        content: "I'm sorry, I encountered an error. Please try again.",
+        timestamp: new Date(),
       };
-      setMessages(prev => [...prev, errorMessage]);
+      setMessages((prev) => [...prev, errorMessage]);
 
     } finally {
       setIsTyping(false);
     }
-  };
-
-  const handleSuggestionClick = (suggestion) => {
-    setInputMessage(suggestion);
   };
 
   const handleKeyPress = (e) => {
@@ -91,7 +96,7 @@ const Chatbot = () => {
   if (loading) {
     return (
       <div className="min-h-screen bg-neutral-50 flex items-center justify-center">
-        <div className="spinner h-8 w-8"></div>
+        <Loader className="h-8 w-8 animate-spin text-primary-600" />
       </div>
     );
   }
@@ -125,8 +130,8 @@ const Chatbot = () => {
               </div>
             </div>
 
-            {/* Messages */}
-            <div className="flex-1 overflow-y-auto p-4 space-y-4">
+            {/* **NEW**: The ref is now on the message container div */}
+            <div ref={chatContainerRef} className="flex-1 overflow-y-auto p-4 space-y-4">
               {messages.map((message) => (
                 <div
                   key={message.id}
@@ -146,7 +151,7 @@ const Chatbot = () => {
                           ? 'bg-primary-500 text-white' 
                           : 'bg-neutral-100 text-neutral-900'
                       }`}>
-                        <p className="text-sm leading-relaxed">{message.content}</p>
+                        <p className="text-sm leading-relaxed whitespace-pre-wrap">{message.content}</p>
                       </div>
                     </div>
                     <p className={`text-xs mt-1 ${message.type === 'user' ? 'text-right' : 'text-left'} text-neutral-500`}>
@@ -158,24 +163,22 @@ const Chatbot = () => {
 
               {/* Typing Indicator */}
               {isTyping && (
-                <div className="flex justify-start">
-                  <div className="max-w-[80%]">
-                    <div className="flex items-start space-x-2">
-                      <div className="p-2 rounded-lg bg-neutral-100">
-                        <Bot className="h-4 w-4 text-neutral-600" />
-                      </div>
-                      <div className="bg-neutral-100 rounded-lg p-3">
-                        <div className="flex items-center space-x-1">
-                          <Loader className="h-4 w-4 animate-spin text-neutral-600" />
-                          <span className="text-sm text-neutral-600">Typing...</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+                 <div className="flex justify-start">
+                 <div className="max-w-[80%]">
+                   <div className="flex items-start space-x-2">
+                     <div className="p-2 rounded-lg bg-neutral-100">
+                       <Bot className="h-4 w-4 text-neutral-600" />
+                     </div>
+                     <div className="bg-neutral-100 rounded-lg p-3">
+                       <div className="flex items-center space-x-1">
+                         <Loader className="h-4 w-4 animate-spin text-neutral-600" />
+                         <span className="text-sm text-neutral-600">Typing...</span>
+                       </div>
+                     </div>
+                   </div>
+                 </div>
+               </div>
               )}
-
-              <div ref={messagesEndRef} />
             </div>
 
             {/* Input Area */}
@@ -189,6 +192,7 @@ const Chatbot = () => {
                     placeholder="Type your legal question here..."
                     className="form-input resize-none pr-12"
                     rows={2}
+                    disabled={isTyping}
                   />
                 </div>
                 <button

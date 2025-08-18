@@ -12,7 +12,8 @@ import {
   Calendar,
   ArrowRight,
   Search,
-  Filter
+  Filter,
+  Loader
 } from 'lucide-react';
 import useAuthStore from '../store/authStore';
 
@@ -110,7 +111,7 @@ const UserDashboard = () => {
   if (loading) {
     return (
       <div className="min-h-screen bg-neutral-50 flex items-center justify-center">
-        <div className="spinner h-8 w-8"></div>
+        <Loader className="h-8 w-8 animate-spin text-primary-600" />
       </div>
     );
   }
