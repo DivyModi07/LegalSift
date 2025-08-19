@@ -11,7 +11,8 @@ import {
   Send,
   Loader,
   ChevronDown,
-  ChevronUp
+  ChevronUp,
+  Calendar,
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import useAuthStore from '../store/authStore';
@@ -25,6 +26,7 @@ const SubmitComplaint = () => {
   const [formData, setFormData] = useState({
     state: '',
     city: '',
+    dateOfIncident: '',
     complaint: '',
   });
   const [errors, setErrors] = useState({});
@@ -54,6 +56,10 @@ const SubmitComplaint = () => {
     if (!formData.city.trim()) {
       newErrors.city = 'Please enter your city';
     }
+
+    if (!formData.dateOfIncident) {
+      newErrors.dateOfIncident = 'Please select the date of the incident';
+    }
     
     if (!formData.complaint.trim()) {
       newErrors.complaint = 'Please describe your complaint';
@@ -77,7 +83,9 @@ const SubmitComplaint = () => {
     setShowResult(false);
     
     try {
-      const response = await complaintService.submitComplaintForAnalysis(formData.complaint);
+      // --- THIS IS THE FIX ---
+      // Pass the entire formData object to the service.
+      const response = await complaintService.submitComplaintForAnalysis(formData);
       
       const formattedResult = {
         urgency: response.predicted_urgency,
@@ -89,12 +97,12 @@ const SubmitComplaint = () => {
       setShowResult(true);
       toast.success('Complaint analyzed successfully!');
 
-      // Scroll to the top of the page after a successful submission
       if (topRef.current) {
         topRef.current.scrollIntoView({ behavior: 'smooth' });
       }
     } catch (error) {
-      console.error('Error submitting complaint:', error);
+      // This part is what shows you the error message.
+      console.error('Error submitting complaint:', error.response?.data || error);
       toast.error('Failed to analyze complaint. Please try again.');
     } finally {
       setIsSubmitting(false);
@@ -172,46 +180,68 @@ const SubmitComplaint = () => {
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-6">
-              {/* State Selection */}
-              <div>
-                <label htmlFor="state" className="form-label">
-                  State
-                </label>
-                <select
-                  id="state"
-                  name="state"
-                  value={formData.state}
-                  onChange={handleChange}
-                  className={`form-input ${errors.state ? 'border-error' : ''}`}
-                >
-                  <option value="">Select your state</option>
-                  {states.map((state) => (
-                    <option key={state} value={state}>
-                      {state}
-                    </option>
-                  ))}
-                </select>
-                {errors.state && (
-                  <p className="form-error">{errors.state}</p>
-                )}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* State Selection */}
+                <div>
+                  <label htmlFor="state" className="form-label">
+                    State
+                  </label>
+                  <select
+                    id="state"
+                    name="state"
+                    value={formData.state}
+                    onChange={handleChange}
+                    className={`form-input ${errors.state ? 'border-error' : ''}`}
+                  >
+                    <option value="">Select your state</option>
+                    {states.map((state) => (
+                      <option key={state} value={state}>
+                        {state}
+                      </option>
+                    ))}
+                  </select>
+                  {errors.state && (
+                    <p className="form-error">{errors.state}</p>
+                  )}
+                </div>
+
+                {/* City Text Field */}
+                <div>
+                  <label htmlFor="city" className="form-label">
+                    City
+                  </label>
+                  <input
+                    type="text"
+                    id="city"
+                    name="city"
+                    placeholder="Enter your city"
+                    value={formData.city}
+                    onChange={handleChange}
+                    className={`form-input ${errors.city ? 'border-error' : ''}`}
+                  />
+                  {errors.city && (
+                    <p className="form-error">{errors.city}</p>
+                  )}
+                </div>
               </div>
 
-              {/* City Text Field */}
+              {/* Date of Incident */}
               <div>
-                <label htmlFor="city" className="form-label">
-                  City
+                <label htmlFor="dateOfIncident" className="form-label">
+                  Date of Incident
                 </label>
                 <input
-                  type="text"
-                  id="city"
-                  name="city"
-                  placeholder="Enter your city"
-                  value={formData.city}
+                  type="date"
+                  id="dateOfIncident"
+                  name="dateOfIncident"
+                  value={formData.dateOfIncident}
                   onChange={handleChange}
-                  className={`form-input ${errors.city ? 'border-error' : ''}`}
+                  className={`form-input ${errors.dateOfIncident ? 'border-error' : ''}`}
+                  // Prevent future dates from being selected
+                  max={new Date().toISOString().split("T")[0]}
                 />
-                {errors.city && (
-                  <p className="form-error">{errors.city}</p>
+                {errors.dateOfIncident && (
+                  <p className="form-error">{errors.dateOfIncident}</p>
                 )}
               </div>
 
