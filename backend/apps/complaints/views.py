@@ -2,48 +2,79 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.generics import ListAPIView
 
-# Import our master analysis function from the mlengine app
+# Import the ML analysis function
 from apps.mlengine.complaint_analysis import analyze_complaint
+
+# Import your new model and serializer
+from .models import Complaint
+from .serializers import ComplaintSerializer
 
 class ComplaintAnalysisView(APIView):
     """
-    An API endpoint that accepts a complaint text via a POST request,
-    analyzes it using the ML pipeline, and returns the analysis.
+    An API endpoint that accepts complaint details, analyzes them,
+    and saves the complaint and its analysis to the database.
     """
-    # Ensure that only authenticated (logged-in) users can access this endpoint
     permission_classes = [IsAuthenticated]
 
     def post(self, request, *args, **kwargs):
         """
-        Handles the POST request containing the complaint text.
+        Handles the POST request with the complaint details.
         """
-        # 1. Get the complaint text from the request data
-        complaint_text = request.data.get('complaint_text', None)
+        # 1. Get data from the request
+        data = request.data
+        user = request.user
 
-        # 2. Validate the input
-        if not complaint_text:
+        # 2. Basic validation
+        required_fields = ['state', 'city', 'dateOfIncident', 'complaint_text']
+        if not all(field in data for field in required_fields):
             return Response(
-                {"error": "The 'complaint_text' field is required."},
+                {"error": "Missing one or more required fields."},
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-        # 3. Call the analysis function
-        # This is where the magic happens! We pass the text to our ML pipeline.
-        try:
-            analysis_result = analyze_complaint(complaint_text)
-            
-            # Check if the ML models loaded correctly
-            if "error" in analysis_result:
-                 return Response(analysis_result, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        complaint_text = data['complaint_text']
 
-            # 4. Return the successful result
+        try:
+            # 3. Call the analysis function from the mlengine
+            analysis_result = analyze_complaint(complaint_text)
+            if "error" in analysis_result:
+                return Response(analysis_result, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+            # 4. Create and save the Complaint instance
+            Complaint.objects.create(
+                user=user,
+                state=data['state'],
+                city=data['city'],
+                date_of_incident=data['dateOfIncident'],
+                complaint_text=complaint_text,
+                predicted_urgency=analysis_result.get('predicted_urgency'),
+                predicted_category=analysis_result.get('predicted_category'),
+                # The JSONField handles the dictionary list directly
+                recommended_sections=analysis_result.get('recommended_sections', [])
+            )
+
+            # 5. Return the analysis result to the frontend
             return Response(analysis_result, status=status.HTTP_200_OK)
 
         except Exception as e:
-            # Handle any unexpected errors during analysis
-            print(f"Error during complaint analysis: {e}") # For logging
+            print(f"Error during complaint analysis or saving: {e}") # For logging
             return Response(
-                {"error": "An unexpected error occurred during analysis."},
+                {"error": "An unexpected error occurred."},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
+
+class ComplaintHistoryView(ListAPIView):
+    """
+    An API endpoint that returns the complaint history for the authenticated user.
+    """
+    serializer_class = ComplaintSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        """
+        This view returns a list of all complaints filed by the
+        currently authenticated user, ordered by the newest first.
+        """
+        return Complaint.objects.filter(user=self.request.user).order_by('-created_at')

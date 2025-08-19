@@ -32,8 +32,6 @@ load_dotenv(os.path.join(BASE_DIR, '.env'))
 SECRET_KEY = config('SECRET_KEY') # <-- This line will now work
 DEBUG = config('DEBUG', default=False, cast=bool)
 
-# --- ADD THIS LINE TO MODIFY THE PYTHON PATH ---
-sys.path.insert(0, os.path.join(BASE_DIR, 'apps'))
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -70,7 +68,6 @@ SESSION_ENGINE = 'django.contrib.sessions.backends.db'
 
 
 # Application definition
-
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -78,14 +75,15 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    
     'rest_framework',
     'rest_framework_simplejwt',
     'corsheaders',
-    'users',
-    'complaints',
-    'dashboard',
-    'mlengine',
 
+    'apps.users.apps.UsersConfig',
+    'apps.complaints.apps.ComplaintsConfig',
+    'apps.dashboard.apps.DashboardConfig',
+    'apps.mlengine.apps.MlengineConfig',
 ]
 
 MIDDLEWARE = [
