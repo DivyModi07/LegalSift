@@ -14,7 +14,7 @@ const useAuthStore = create(
       // User state
       user: null,
       isAuthenticated: false,
-      userRole: null, // 'user', 'admin', 'lawyer'
+      userRole: null, // This will now only ever be 'user' or null
       
       // Loading states
       isLoading: false,
@@ -40,24 +40,22 @@ const useAuthStore = create(
               name: `${result.data.user.first_name} ${result.data.user.last_name}`,
               email: result.data.user.email,
               phone_number: result.data.user.phone_number,
-              role: result.data.user.role || 'user',
+              role: 'user', // Role is now hardcoded to 'user'
             };
             
             set({
               user,
               isAuthenticated: true,
-              userRole: user.role,
+              userRole: 'user', // Role is now hardcoded to 'user'
               isLoading: false,
             });
             return { success: true };
           } else {
-            // This is the important change: throw an error on failure
             throw new Error(result.error);
           }
         } catch (error) {
           console.error('Login error in store:', error);
           set({ isLoading: false });
-          // Re-throw the error so the component can catch it
           throw error;
         }
       },
@@ -66,51 +64,39 @@ const useAuthStore = create(
       register: async (userData) => {
         set({ isLoading: true });
         try {
-          console.log('Attempting registration with data:', userData);
           const result = await registerUser(userData);
-          console.log('Registration result:', result);
           
           if (result.success) {
-            console.log('Registration successful, data:', result.data);
-            
-            // Check if we have the expected data structure
             if (!result.data || !result.data.user || !result.data.access) {
-              console.error('Invalid response structure:', result.data);
-              set({ isLoading: false });
-              return { success: false, error: 'Invalid response from server' };
+              throw new Error('Invalid response from server');
             }
             
-            // Store tokens
             localStorage.setItem('access_token', result.data.access);
             localStorage.setItem('refresh_token', result.data.refresh);
             
-            // Set user data
             const user = {
-            id: result.data.user.id,
-            first_name: result.data.user.first_name,
-            name: `${result.data.user.first_name} ${result.data.user.last_name}`,
-            email: result.data.user.email,
-            phone_number: result.data.user.phone_number, // <-- ADD THIS
-            role: result.data.user.role || 'user',
-          };
-            
-            console.log('Setting user data:', user);
+              id: result.data.user.id,
+              first_name: result.data.user.first_name,
+              name: `${result.data.user.first_name} ${result.data.user.last_name}`,
+              email: result.data.user.email,
+              phone_number: result.data.user.phone_number,
+              role: 'user', // Role is now hardcoded to 'user'
+            };
             
             set({
               user,
               isAuthenticated: true,
-              userRole: user.role,
+              userRole: 'user', // Role is now hardcoded to 'user'
               isLoading: false,
             });
             return { success: true };
           } else {
-            set({ isLoading: false });
-            return { success: false, error: result.error };
+            throw new Error(result.error);
           }
         } catch (error) {
           console.error('Registration error in store:', error);
           set({ isLoading: false });
-          return { success: false, error: error.message };
+          throw error;
         }
       },
       
@@ -142,7 +128,6 @@ const useAuthStore = create(
       
       // Logout
       logout: () => {
-        // Clear tokens from localStorage
         localStorage.removeItem('access_token');
         localStorage.removeItem('refresh_token');
         
@@ -155,16 +140,6 @@ const useAuthStore = create(
         });
       },
       
-      // Update user profile
-      updateProfile: (updatedData) => {
-        const currentUser = get().user;
-        if (currentUser) {
-          set({
-            user: { ...currentUser, ...updatedData },
-          });
-        }
-      },
-      
       // Check email and phone availability
       checkEmailPhone: async (email, phone) => {
         try {
@@ -175,13 +150,13 @@ const useAuthStore = create(
         }
       },
       
-      // Check if user is already authenticated (for page refreshes)
+      // Check if user is already authenticated
       checkAuth: () => {
         const token = localStorage.getItem('access_token');
         const user = get().user;
         
         if (token && user) {
-          set({ isAuthenticated: true, userRole: user.role });
+          set({ isAuthenticated: true, userRole: 'user' });
           return true;
         }
         return false;
@@ -190,14 +165,12 @@ const useAuthStore = create(
     {
       name: 'auth-storage',
       partialize: (state) => ({
-      user: state.user,
-      isAuthenticated: state.isAuthenticated,
-      userRole: state.userRole,
-    }),
+        user: state.user,
+        isAuthenticated: state.isAuthenticated,
+        userRole: state.userRole,
+      }),
     }
   )
 );
-
-
 
 export default useAuthStore;

@@ -24,8 +24,8 @@ const LandingPage = () => {
     'Instant legal analysis and guidance',
     'Comprehensive IPC section exploration',
     'AI-powered legal assistant',
-    'Professional lawyer recommendations',
-    'Secure and confidential',
+    'Secure and confidential platform',
+    'Easy-to-use interface',
     '24/7 accessibility',
   ];
 
@@ -47,8 +47,7 @@ const LandingPage = () => {
             </h1>
             
             <p className="text-xl text-neutral-600 mb-8 max-w-2xl mx-auto leading-relaxed">
-              Get instant legal analysis, explore IPC sections, and connect with qualified lawyers. 
-              Empowering citizens with accessible legal guidance.
+              Get instant legal analysis and explore IPC sections. Empowering citizens with accessible legal guidance.
             </p>
             
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -114,8 +113,9 @@ const LandingPage = () => {
             </p>
           </div>
           
-          <div className="grid md:grid-cols-3 gap-8">
-            <div className="text-center">
+          <div className="flex flex-col md:flex-row items-center justify-center gap-8 md:gap-0">
+            {/* Step 1 */}
+            <div className="text-center flex-1">
               <div className="bg-primary-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6">
                 <span className="text-2xl font-bold text-primary-600">1</span>
               </div>
@@ -124,8 +124,14 @@ const LandingPage = () => {
                 Describe your legal issue in detail. Our AI will analyze and provide relevant legal guidance.
               </p>
             </div>
-            
-            <div className="text-center">
+
+            {/* Arrow 1 */}
+            <div className="hidden md:flex flex-shrink-0 px-8 text-primary-300">
+                <ArrowRight size={40} strokeWidth={1.5} />
+            </div>
+
+            {/* Step 2 */}
+            <div className="text-center flex-1">
               <div className="bg-primary-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6">
                 <span className="text-2xl font-bold text-primary-600">2</span>
               </div>
@@ -134,14 +140,20 @@ const LandingPage = () => {
                 Receive instant analysis including relevant IPC sections, urgency level, and recommended actions.
               </p>
             </div>
-            
-            <div className="text-center">
+
+            {/* Arrow 2 */}
+            <div className="hidden md:flex flex-shrink-0 px-8 text-primary-300">
+                <ArrowRight size={40} strokeWidth={1.5} />
+            </div>
+
+            {/* Step 3 */}
+            <div className="text-center flex-1">
               <div className="bg-primary-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6">
                 <span className="text-2xl font-bold text-primary-600">3</span>
               </div>
-              <h3 className="text-xl font-semibold text-neutral-900 mb-4">Connect with Lawyers</h3>
+              <h3 className="text-xl font-semibold text-neutral-900 mb-4">Explore and Understand</h3>
               <p className="text-neutral-600">
-                For high-urgency cases, get connected with qualified lawyers in your area with transparent fees.
+                Use our tools to explore the IPC and chat with our AI assistant to clarify your legal questions.
               </p>
             </div>
           </div>
@@ -199,12 +211,6 @@ const LandingPage = () => {
             >
               Create Free Account
               <ArrowRight className="ml-2 h-5 w-5" />
-            </Link>
-            <Link
-              to="/lawyer-application"
-              className="border-2 border-white text-white hover:bg-white hover:text-primary-600 px-8 py-3 rounded-lg font-medium transition-colors"
-            >
-              Apply as Lawyer
             </Link>
           </div>
         </div>

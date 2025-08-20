@@ -13,12 +13,8 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from .serializers import UserSerializer
 from django.conf import settings
 
-from rest_framework.permissions import IsAuthenticated
-
 # Get your custom user model
 User = get_user_model()
-
-
 
 # --- Core Authentication Views (Class-Based) ---
 
@@ -55,6 +51,7 @@ class UserRegistrationView(generics.CreateAPIView):
         request.session.pop('otp_email', None)
         request.session.pop('otp_time', None)
         
+        # Return response with tokens and user data
         return Response({
             'refresh': str(refresh),
             'access': str(refresh.access_token),
@@ -64,7 +61,7 @@ class UserRegistrationView(generics.CreateAPIView):
                 'first_name': user.first_name,
                 'last_name': user.last_name,
                 'phone_number': user.phone_number,
-                'role': 'user',
+                'role': 'user',  # New registrations are always regular users
             }
         }, status=status.HTTP_201_CREATED)
 
@@ -94,24 +91,21 @@ class UserLoginView(APIView):
             # Generate JWT tokens
             refresh = RefreshToken.for_user(user)
             
-            # Determine user role
-            if user.is_superuser or user.is_staff:
-                role = 'admin'
-            else:
-                role = 'user'
+            # SIMPLIFIED: Every logged-in user is now considered a 'user'
+            role = 'user'
             
             return Response({
-            'refresh': str(refresh),
-            'access': str(refresh.access_token),
-            'user': {
-                'id': user.id,
-                'email': user.email,
-                'first_name': user.first_name,
-                'last_name': user.last_name,
-                'phone_number': user.phone_number,  # <-- ADD THIS LINE
-                'role': role,
-            }
-        }, status=status.HTTP_200_OK)
+                'refresh': str(refresh),
+                'access': str(refresh.access_token),
+                'user': {
+                    'id': user.id,
+                    'email': user.email,
+                    'first_name': user.first_name,
+                    'last_name': user.last_name,
+                    'phone_number': user.phone_number,
+                    'role': role,
+                }
+            }, status=status.HTTP_200_OK)
         
         return Response({"error": "Invalid credentials"}, status=status.HTTP_401_UNAUTHORIZED)
 
@@ -125,7 +119,7 @@ def check_email_phone(request):
     Checks if an email or phone number already exists in the database.
     """
     email = request.data.get('email')
-    phone = request.data.get('phone_number') # Ensure frontend sends 'phone_number'
+    phone = request.data.get('phone_number')
 
     errors = {}
     if email and User.objects.filter(email=email).exists():
@@ -145,21 +139,27 @@ def send_otp_email(request):
     if not email:
         return Response({"error": "Email is required"}, status=status.HTTP_400_BAD_REQUEST)
 
-    # Check if user exists
-    user_exists = User.objects.filter(email=email).exists()
-
-    # Generate OTP always (don’t leak existence info)
     otp = random.randint(100000, 999999)
     request.session['otp'] = str(otp)
     request.session['otp_email'] = email
     request.session['otp_time'] = timezone.now().isoformat()
 
-    subject = "Your OTP for Password Reset"
-    message = f"Your OTP is {otp}. It will expire in 10 minutes."
+    # --- UPDATED MESSAGE ---
+    subject = f"Your Verification Code for LegalSift: {otp}"
+    message = f"""
+Hello,
 
-    print("DEBUG email received from request:", email)
-    print("DEBUG sending FROM:", settings.DEFAULT_FROM_EMAIL)
-    print("DEBUG sending TO:", [email])
+Your One-Time Password (OTP) for LegalSift is:
+
+{otp}
+
+This code is valid for 10 minutes. Please use it to complete your verification process.
+
+If you did not request this code, please ignore this email for your security.
+
+Thank you,
+The LegalSift Team
+"""
 
     try:
         send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, [email])
@@ -167,11 +167,10 @@ def send_otp_email(request):
         print(f"Email sending failed: {e}")
         return Response({"error": "Failed to send email due to a server error."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-    response_data = {"message": "If an account with this email exists, an OTP has been sent."}
+    response_data = {"message": "An OTP has been sent to your email address."}
     if settings.DEBUG:
-        response_data["dev_otp"] = otp  # only for dev testing
+        response_data["dev_otp"] = otp
     return Response(response_data, status=status.HTTP_200_OK)
-
 
 
 @api_view(['POST'])
@@ -193,14 +192,12 @@ def verify_otp(request):
     # Check OTP expiry (10 minutes)
     otp_time = timezone.datetime.fromisoformat(stored_otp_time)
     if (timezone.now() - otp_time).total_seconds() > 600:
-        # Clear expired OTP from session
         request.session.flush()
         return Response({"error": "OTP has expired. Please request a new one."}, status=status.HTTP_400_BAD_REQUEST)
 
     if email != stored_email or str(otp_entered) != str(stored_otp):
         return Response({"error": "Invalid OTP."}, status=status.HTTP_400_BAD_REQUEST)
     
-    # Mark OTP as verified for registration
     request.session['otp_verified'] = True
     request.session['registration_email'] = email
     
@@ -216,7 +213,6 @@ def reset_password(request):
     email = request.data.get("email")
     new_password = request.data.get("new_password")
     
-    # Check if the OTP was actually verified in this session
     if not request.session.get('otp_verified') or request.session.get('otp_email') != email:
         return Response({"error": "Please verify your OTP before resetting the password."}, status=status.HTTP_403_FORBIDDEN)
 
@@ -228,7 +224,6 @@ def reset_password(request):
         user.set_password(new_password)
         user.save()
         
-        # Clear the session after successful password reset
         request.session.flush()
         
         return Response({"message": "Password reset successful."}, status=status.HTTP_200_OK)
@@ -236,5 +231,3 @@ def reset_password(request):
         return Response({"error": "User not found."}, status=status.HTTP_404_NOT_FOUND)
     except Exception as e:
         return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-    
-

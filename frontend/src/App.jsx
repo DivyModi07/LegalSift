@@ -3,10 +3,7 @@ import { Toaster } from 'react-hot-toast';
 import { useEffect } from 'react';
 import useAuthStore from './store/authStore';
 
-// Import the new component
 import ScrollToTop from './components/ScrollToTop';
-
-// Layout Components
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 
@@ -19,49 +16,40 @@ import UserDashboard from './pages/UserDashboard';
 import SubmitComplaint from './pages/SubmitComplaint';
 import IPCExplorer from './pages/IPCExplorer';
 import Chatbot from './pages/Chatbot';
-import AdminComplaints from './pages/AdminComplaints';
-import AdminAnalytics from './pages/AdminAnalytics';
-import AdminLawyers from './pages/AdminLawyers';
-import LawyerApplication from './pages/LawyerApplication';
 import Profile from './pages/Profile';
-// Import the two new pages
 import PrivacyPolicy from './pages/PrivacyPolicy';
 import TermsOfService from './pages/TermsOfService';
 
-// Protected Route Component
-const ProtectedRoute = ({ children, allowedRoles = [] }) => {
-  const { isAuthenticated, userRole } = useAuthStore();
+// Protected Route Component (Simplified)
+const ProtectedRoute = ({ children }) => {
+  const { isAuthenticated } = useAuthStore();
   
   if (!isAuthenticated) {
+    // Redirect them to the /login page, but save the current location they were
+    // trying to go to. This allows us to send them along to that page after login.
     return <Navigate to="/login" replace />;
   }
   
-  if (allowedRoles.length > 0 && !allowedRoles.includes(userRole)) {
-    return <Navigate to="/" replace />;
-  }
-  
+  // If authenticated, render the child component (the protected page)
   return children;
 };
 
-// Home Route Component with Auto-Redirect
+// Home Route Component (Simplified)
 const HomeRoute = () => {
-  const { isAuthenticated, userRole } = useAuthStore();
+  const { isAuthenticated } = useAuthStore();
   
   if (isAuthenticated) {
-    if (userRole === 'admin') {
-      return <Navigate to="/admin/complaints" replace />;
-    } else {
-      return <Navigate to="/dashboard" replace />;
-    }
+    // If user is logged in, always redirect to their dashboard
+    return <Navigate to="/dashboard" replace />;
   }
   
+  // If not logged in, show the landing page
   return <LandingPage />;
 };
 
 function App() {
   const { checkAuth } = useAuthStore();
   
-  // Check authentication on app load
   useEffect(() => {
     checkAuth();
   }, [checkAuth]);
@@ -80,72 +68,28 @@ function App() {
             <Route path="/register" element={<Register />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/ipc-explorer" element={<IPCExplorer />} />
-            <Route path="/lawyer-application" element={<LawyerApplication />} />
-            {/* Add the new routes here */}
             <Route path="/privacy-policy" element={<PrivacyPolicy />} />
             <Route path="/terms-of-service" element={<TermsOfService />} />
             
             {/* Protected User Routes */}
             <Route 
               path="/dashboard" 
-              element={
-                <ProtectedRoute allowedRoles={['user']}>
-                  <UserDashboard />
-                </ProtectedRoute>
-              } 
+              element={<ProtectedRoute><UserDashboard /></ProtectedRoute>} 
             />
             <Route 
               path="/submit-complaint" 
-              element={
-                <ProtectedRoute allowedRoles={['user']}>
-                  <SubmitComplaint />
-                </ProtectedRoute>
-              } 
+              element={<ProtectedRoute><SubmitComplaint /></ProtectedRoute>} 
             />
             <Route 
               path="/chatbot" 
-              element={
-                <ProtectedRoute allowedRoles={['user']}>
-                  <Chatbot />
-                </ProtectedRoute>
-              } 
+              element={<ProtectedRoute><Chatbot /></ProtectedRoute>} 
             />
             <Route 
               path="/profile" 
-              element={
-                <ProtectedRoute allowedRoles={['user', 'admin']}>
-                  <Profile />
-                </ProtectedRoute>
-              } 
+              element={<ProtectedRoute><Profile /></ProtectedRoute>} 
             />
             
-            {/* Protected Admin Routes */}
-            <Route 
-              path="/admin/complaints" 
-              element={
-                <ProtectedRoute allowedRoles={['admin']}>
-                  <AdminComplaints />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/admin/analytics" 
-              element={
-                <ProtectedRoute allowedRoles={['admin']}>
-                  <AdminAnalytics />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/admin/lawyers" 
-              element={
-                <ProtectedRoute allowedRoles={['admin']}>
-                  <AdminLawyers />
-                </ProtectedRoute>
-              } 
-            />
-            
-            {/* Catch all route */}
+            {/* Catch-all route to redirect to home */}
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </main>
@@ -153,7 +97,6 @@ function App() {
         <Footer />
       </div>
       
-      {/* Toast Notifications */}
       <Toaster
         position="top-right"
         toastOptions={{

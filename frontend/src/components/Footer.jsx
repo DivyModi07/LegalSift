@@ -3,10 +3,11 @@ import { Scale, AlertTriangle, Mail, Phone, MapPin } from 'lucide-react';
 import useAuthStore from '../store/authStore';
 
 const Footer = () => {
-  const { isAuthenticated, userRole } = useAuthStore();
+  const { isAuthenticated } = useAuthStore();
 
   const getQuickLinks = () => {
-    if (isAuthenticated && userRole === 'user') {
+    if (isAuthenticated) {
+      // Links for any logged-in user
       return [
         { to: '/dashboard', label: 'Dashboard' },
         { to: '/submit-complaint', label: 'Submit Complaint' },
@@ -14,18 +15,12 @@ const Footer = () => {
         { to: '/chatbot', label: 'Legal Assistant' },
       ];
     }
-    if (isAuthenticated && userRole === 'admin') {
-      return [
-        { to: '/admin/complaints', label: 'Recent Complaints' },
-        { to: '/admin/analytics', label: 'Analytics' },
-        { to: '/admin/lawyers', label: 'Lawyer Management' },
-      ];
-    }
+    // Links for logged-out users
     return [
       { to: '/', label: 'Home' },
       { to: '/ipc-explorer', label: 'IPC Explorer' },
-      { to: '/lawyer-application', label: 'Apply as Lawyer' },
       { to: '/login', label: 'Login' },
+      { to: '/register', label: 'Register' },
     ];
   };
 
@@ -68,11 +63,11 @@ const Footer = () => {
             <div className="flex flex-col space-y-3 text-sm">
                 <div className="flex items-start">
                     <Mail className="h-4 w-4 mr-2 mt-1 flex-shrink-0 text-primary-200" />
-                    <span className="text-primary-100">support@legalsift.com</span>
+                    <span className="text-primary-100">LegalSift@gmail.com</span>
                 </div>
                 <div className="flex items-start">
                     <Phone className="h-4 w-4 mr-2 mt-1 flex-shrink-0 text-primary-200" />
-                    <span className="text-primary-100">+91 12345 67890</span>
+                    <span className="text-primary-100">+91 70692 35312</span>
                 </div>
                 <div className="flex items-start">
                     <MapPin className="h-4 w-4 mr-2 mt-1 flex-shrink-0 text-primary-200" />
@@ -105,7 +100,6 @@ const Footer = () => {
               © {new Date().getFullYear()} LegalSift. All rights reserved.
             </p>
             <div className="flex space-x-6 text-sm">
-              {/* Corrected links */}
               <Link to="/privacy-policy" className="text-primary-200 hover:text-white transition-colors">
                 Privacy Policy
               </Link>
