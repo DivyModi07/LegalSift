@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Eye, EyeOff, Mail, Lock, User, Phone, ArrowLeft, ArrowRight } from 'lucide-react';
+import { Eye, EyeOff, Mail, Lock, User, Phone, ArrowLeft, ArrowRight, Scale } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import useAuthStore from '../store/authStore';
 
@@ -118,7 +118,7 @@ const Register = () => {
     setStep(step - 1);
   };
 
-    const handleSubmit = async (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     
     if (!validateStep3()) {
@@ -179,38 +179,71 @@ const Register = () => {
     }
   };
 
+  const stepTitles = [
+    'Personal Information',
+    'Secure Password',
+    'Verify Email'
+  ];
+
   return (
-    <div className="min-h-screen bg-neutral-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8">
+    <div className="min-h-screen flex items-center justify-center bg-[#FAFAF5] px-6 py-12 relative overflow-hidden">
+      {/* Subtle Background Pattern */}
+      <div className="absolute inset-0 opacity-[0.02]">
+        <div className="absolute top-0 left-0 w-full h-full bg-repeat opacity-50" 
+             style={{
+               backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23C9A227' fill-opacity='0.1'%3E%3Cpath d='M30 30c0-11.046 8.954-20 20-20s20 8.954 20 20-8.954 20-20 20-20-8.954-20-20z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`
+             }}>
+        </div>
+      </div>
+
+      <div className="max-w-md w-full space-y-8 relative z-10">
         {/* Header */}
-        <div className="text-center">
-          <Link to="/" className="inline-flex items-center text-primary-600 hover:text-primary-500 mb-6">
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Back to Home
-          </Link>
-          
-          <h2 className="text-3xl font-bold text-neutral-900 mb-2">
-            Create your account
-          </h2>
-          <p className="text-neutral-600">
-            Join LegalSift to get started with legal assistance
-          </p>
+        <div className="text-center space-y-6">
+          <div className="flex justify-start">
+            <Link 
+              to="/" 
+              className="inline-flex items-center text-[#7A7A7A] hover:text-[#C9A227] transition-colors duration-300 group"
+            >
+              <ArrowLeft className="h-4 w-4 mr-2 group-hover:-translate-x-1 transition-transform duration-300" />
+              <span className="text-sm font-medium">Back to Home</span>
+            </Link>
+          </div>
+
+          <div className="space-y-4">
+            <div className="mx-auto w-16 h-16 bg-gradient-to-br from-[#C9A227] to-[#b8911f] rounded-2xl flex items-center justify-center shadow-lg">
+              <Scale className="h-8 w-8 text-white" />
+            </div>
+            
+            <div>
+              <h2 className="text-3xl font-bold text-[#1C1C1C] mb-3 tracking-tight">
+                Join LegalSift
+              </h2>
+              <p className="text-[#7A7A7A] text-base leading-relaxed">
+                Create your account to access premium legal assistance
+              </p>
+            </div>
+          </div>
         </div>
 
         {/* Progress Steps */}
-        <div className="flex items-center justify-center space-x-4">
+        <div className="flex items-center justify-center space-x-2">
           {[1, 2, 3].map((stepNumber) => (
             <div key={stepNumber} className="flex items-center">
-              <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
-                step >= stepNumber 
-                  ? 'bg-primary-500 text-white' 
-                  : 'bg-neutral-200 text-neutral-600'
-              }`}>
-                {stepNumber}
+              <div className="flex flex-col items-center">
+                <div className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold transition-all duration-300 ${
+                  step >= stepNumber 
+                    ? 'bg-gradient-to-r from-[#C9A227] to-[#b8911f] text-white shadow-lg transform scale-110' 
+                    : 'bg-gray-200 text-[#7A7A7A]'
+                }`}>
+                  {stepNumber}
+                </div>
+                <div className="text-xs text-[#7A7A7A] mt-2 font-medium hidden sm:block">
+                  {stepTitles[stepNumber - 1]}
+                </div>
               </div>
               {stepNumber < 3 && (
-                <div className={`w-8 h-0.5 mx-2 ${
-                  step > stepNumber ? 'bg-primary-500' : 'bg-neutral-200'
+                <div className={`w-12 h-0.5 mx-3 transition-colors duration-300 ${
+                  step > stepNumber ? 'bg-[#C9A227]' : 'bg-gray-200'
                 }`} />
               )}
             </div>
@@ -218,235 +251,257 @@ const Register = () => {
         </div>
 
         {/* Registration Form */}
-        <div className="card p-8">
+        <div className="bg-white shadow-2xl rounded-3xl p-8 border border-gray-100 backdrop-blur-sm">
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Step 1: Basic Information */}
             {step === 1 && (
               <>
                 <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label htmlFor="firstName" className="form-label">
+                  <div className="space-y-2">
+                    <label htmlFor="firstName" className="block text-sm font-semibold text-[#1C1C1C]">
                       First Name
                     </label>
-                    <div className="relative">
-                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <User className="h-5 w-5 text-neutral-400" />
-                      </div>
+                    <div className="relative group">
+                      <User className="absolute inset-y-0 left-4 h-5 w-5 text-[#7A7A7A] my-auto group-focus-within:text-[#C9A227] transition-colors duration-300" />
                       <input
                         id="firstName"
                         name="firstName"
                         type="text"
                         autoComplete="given-name"
                         required
-                        className={`form-input pl-10 ${errors.firstName ? 'border-error' : ''}`}
+                        className={`w-full pl-12 pr-4 py-3 rounded-xl border-2 ${
+                          errors.firstName 
+                            ? 'border-[#6B2F2F] focus:border-[#6B2F2F] focus:ring-[#6B2F2F]' 
+                            : 'border-gray-200 focus:border-[#C9A227] focus:ring-[#C9A227]'
+                        } focus:outline-none focus:ring-2 focus:ring-opacity-20 transition-all duration-300 bg-gray-50 focus:bg-white text-[#1C1C1C] placeholder-[#7A7A7A]`}
                         placeholder="First name"
                         value={formData.firstName}
                         onChange={handleChange}
                       />
                     </div>
                     {errors.firstName && (
-                      <p className="form-error">{errors.firstName}</p>
+                      <p className="text-sm text-[#6B2F2F] flex items-center mt-1">
+                        <span className="mr-1">⚠️</span>
+                        {errors.firstName}
+                      </p>
                     )}
                   </div>
 
-                  <div>
-                    <label htmlFor="lastName" className="form-label">
+                  <div className="space-y-2">
+                    <label htmlFor="lastName" className="block text-sm font-semibold text-[#1C1C1C]">
                       Last Name
                     </label>
-                    <div className="relative">
-                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <User className="h-5 w-5 text-neutral-400" />
-                      </div>
+                    <div className="relative group">
+                      <User className="absolute inset-y-0 left-4 h-5 w-5 text-[#7A7A7A] my-auto group-focus-within:text-[#C9A227] transition-colors duration-300" />
                       <input
                         id="lastName"
                         name="lastName"
                         type="text"
                         autoComplete="family-name"
                         required
-                        className={`form-input pl-10 ${errors.lastName ? 'border-error' : ''}`}
+                        className={`w-full pl-12 pr-4 py-3 rounded-xl border-2 ${
+                          errors.lastName 
+                            ? 'border-[#6B2F2F] focus:border-[#6B2F2F] focus:ring-[#6B2F2F]' 
+                            : 'border-gray-200 focus:border-[#C9A227] focus:ring-[#C9A227]'
+                        } focus:outline-none focus:ring-2 focus:ring-opacity-20 transition-all duration-300 bg-gray-50 focus:bg-white text-[#1C1C1C] placeholder-[#7A7A7A]`}
                         placeholder="Last name"
                         value={formData.lastName}
                         onChange={handleChange}
                       />
                     </div>
                     {errors.lastName && (
-                      <p className="form-error">{errors.lastName}</p>
+                      <p className="text-sm text-[#6B2F2F] flex items-center mt-1">
+                        <span className="mr-1">⚠️</span>
+                        {errors.lastName}
+                      </p>
                     )}
                   </div>
                 </div>
 
-                <div>
-                  <label htmlFor="email" className="form-label">
+                <div className="space-y-2">
+                  <label htmlFor="email" className="block text-sm font-semibold text-[#1C1C1C]">
                     Email Address
                   </label>
-                  <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <Mail className="h-5 w-5 text-neutral-400" />
-                    </div>
+                  <div className="relative group">
+                    <Mail className="absolute inset-y-0 left-4 h-5 w-5 text-[#7A7A7A] my-auto group-focus-within:text-[#C9A227] transition-colors duration-300" />
                     <input
                       id="email"
                       name="email"
                       type="email"
                       autoComplete="email"
                       required
-                      className={`form-input pl-10 ${errors.email ? 'border-error' : ''}`}
-                      placeholder="Enter your email"
+                      className={`w-full pl-12 pr-4 py-4 rounded-xl border-2 ${
+                        errors.email 
+                          ? 'border-[#6B2F2F] focus:border-[#6B2F2F] focus:ring-[#6B2F2F]' 
+                          : 'border-gray-200 focus:border-[#C9A227] focus:ring-[#C9A227]'
+                      } focus:outline-none focus:ring-2 focus:ring-opacity-20 transition-all duration-300 bg-gray-50 focus:bg-white text-[#1C1C1C] placeholder-[#7A7A7A]`}
+                      placeholder="Enter your email address"
                       value={formData.email}
                       onChange={handleChange}
                     />
                   </div>
                   {errors.email && (
-                    <p className="form-error">{errors.email}</p>
+                    <p className="text-sm text-[#6B2F2F] flex items-center mt-1">
+                      <span className="mr-1">⚠️</span>
+                      {errors.email}
+                    </p>
                   )}
                 </div>
 
-                <div>
-                  <label htmlFor="phone" className="form-label">
+                <div className="space-y-2">
+                  <label htmlFor="phone" className="block text-sm font-semibold text-[#1C1C1C]">
                     Phone Number
                   </label>
-                  <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <Phone className="h-5 w-5 text-neutral-400" />
-                    </div>
+                  <div className="relative group">
+                    <Phone className="absolute inset-y-0 left-4 h-5 w-5 text-[#7A7A7A] my-auto group-focus-within:text-[#C9A227] transition-colors duration-300" />
                     <input
                       id="phone"
                       name="phone"
                       type="tel"
                       autoComplete="tel"
                       required
-                      className={`form-input pl-10 ${errors.phone ? 'border-error' : ''}`}
+                      className={`w-full pl-12 pr-4 py-4 rounded-xl border-2 ${
+                        errors.phone 
+                          ? 'border-[#6B2F2F] focus:border-[#6B2F2F] focus:ring-[#6B2F2F]' 
+                          : 'border-gray-200 focus:border-[#C9A227] focus:ring-[#C9A227]'
+                      } focus:outline-none focus:ring-2 focus:ring-opacity-20 transition-all duration-300 bg-gray-50 focus:bg-white text-[#1C1C1C] placeholder-[#7A7A7A]`}
                       placeholder="Enter your phone number"
                       value={formData.phone}
                       onChange={handleChange}
                     />
                   </div>
                   {errors.phone && (
-                    <p className="form-error">{errors.phone}</p>
+                    <p className="text-sm text-[#6B2F2F] flex items-center mt-1">
+                      <span className="mr-1">⚠️</span>
+                      {errors.phone}
+                    </p>
                   )}
                 </div>
 
-                                 <button
-                   type="button"
-                   onClick={handleNext}
-                   disabled={isLoading}
-                   className="btn btn-primary w-full py-3"
-                 >
-                   {isLoading ? (
-                     <div className="flex items-center justify-center">
-                       <div className="spinner h-5 w-5 mr-2"></div>
-                       Checking...
-                     </div>
-                   ) : (
-                     <div className="flex items-center justify-center">
-                       Next
-                       <ArrowRight className="ml-2 h-4 w-4" />
-                     </div>
-                   )}
-                 </button>
+                <button
+                  type="button"
+                  onClick={handleNext}
+                  disabled={isLoading}
+                  className="w-full py-4 bg-gradient-to-r from-[#C9A227] to-[#b8911f] hover:from-[#b8911f] hover:to-[#a68019] text-white font-bold rounded-xl shadow-lg transition-all duration-300 transform hover:-translate-y-0.5 hover:shadow-xl disabled:opacity-70 disabled:cursor-not-allowed disabled:transform-none"
+                >
+                  {isLoading ? (
+                    <div className="flex items-center justify-center">
+                      <div className="animate-spin h-5 w-5 border-2 border-white border-t-transparent rounded-full mr-2"></div>
+                      Checking availability...
+                    </div>
+                  ) : (
+                    <div className="flex items-center justify-center">
+                      <span>Continue</span>
+                      <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform duration-300" />
+                    </div>
+                  )}
+                </button>
               </>
             )}
 
             {/* Step 2: Password */}
             {step === 2 && (
               <>
-                <div>
-                  <label htmlFor="password" className="form-label">
+                <div className="space-y-2">
+                  <label htmlFor="password" className="block text-sm font-semibold text-[#1C1C1C]">
                     Password
                   </label>
-                  <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <Lock className="h-5 w-5 text-neutral-400" />
-                    </div>
+                  <div className="relative group">
+                    <Lock className="absolute inset-y-0 left-4 h-5 w-5 text-[#7A7A7A] my-auto group-focus-within:text-[#C9A227] transition-colors duration-300" />
                     <input
                       id="password"
                       name="password"
                       type={showPassword ? 'text' : 'password'}
                       autoComplete="new-password"
                       required
-                      className={`form-input pl-10 pr-10 ${errors.password ? 'border-error' : ''}`}
+                      className={`w-full pl-12 pr-12 py-4 rounded-xl border-2 ${
+                        errors.password 
+                          ? 'border-[#6B2F2F] focus:border-[#6B2F2F] focus:ring-[#6B2F2F]' 
+                          : 'border-gray-200 focus:border-[#C9A227] focus:ring-[#C9A227]'
+                      } focus:outline-none focus:ring-2 focus:ring-opacity-20 transition-all duration-300 bg-gray-50 focus:bg-white text-[#1C1C1C] placeholder-[#7A7A7A]`}
                       placeholder="Create a strong password"
                       value={formData.password}
                       onChange={handleChange}
                     />
                     <button
                       type="button"
-                      className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                      className="absolute inset-y-0 right-4 flex items-center text-[#7A7A7A] hover:text-[#C9A227] transition-colors duration-300"
                       onClick={() => setShowPassword(!showPassword)}
                     >
-                      {showPassword ? (
-                        <EyeOff className="h-5 w-5 text-neutral-400" />
-                      ) : (
-                        <Eye className="h-5 w-5 text-neutral-400" />
-                      )}
+                      {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                     </button>
                   </div>
                   {errors.password && (
-                    <p className="form-error">{errors.password}</p>
+                    <p className="text-sm text-[#6B2F2F] flex items-center mt-1">
+                      <span className="mr-1">⚠️</span>
+                      {errors.password}
+                    </p>
                   )}
                 </div>
 
-                <div>
-                  <label htmlFor="confirmPassword" className="form-label">
+                <div className="space-y-2">
+                  <label htmlFor="confirmPassword" className="block text-sm font-semibold text-[#1C1C1C]">
                     Confirm Password
                   </label>
-                  <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <Lock className="h-5 w-5 text-neutral-400" />
-                    </div>
+                  <div className="relative group">
+                    <Lock className="absolute inset-y-0 left-4 h-5 w-5 text-[#7A7A7A] my-auto group-focus-within:text-[#C9A227] transition-colors duration-300" />
                     <input
                       id="confirmPassword"
                       name="confirmPassword"
                       type={showConfirmPassword ? 'text' : 'password'}
                       autoComplete="new-password"
                       required
-                      className={`form-input pl-10 pr-10 ${errors.confirmPassword ? 'border-error' : ''}`}
+                      className={`w-full pl-12 pr-12 py-4 rounded-xl border-2 ${
+                        errors.confirmPassword 
+                          ? 'border-[#6B2F2F] focus:border-[#6B2F2F] focus:ring-[#6B2F2F]' 
+                          : 'border-gray-200 focus:border-[#C9A227] focus:ring-[#C9A227]'
+                      } focus:outline-none focus:ring-2 focus:ring-opacity-20 transition-all duration-300 bg-gray-50 focus:bg-white text-[#1C1C1C] placeholder-[#7A7A7A]`}
                       placeholder="Confirm your password"
                       value={formData.confirmPassword}
                       onChange={handleChange}
                     />
                     <button
                       type="button"
-                      className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                      className="absolute inset-y-0 right-4 flex items-center text-[#7A7A7A] hover:text-[#C9A227] transition-colors duration-300"
                       onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                     >
-                      {showConfirmPassword ? (
-                        <EyeOff className="h-5 w-5 text-neutral-400" />
-                      ) : (
-                        <Eye className="h-5 w-5 text-neutral-400" />
-                      )}
+                      {showConfirmPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                     </button>
                   </div>
                   {errors.confirmPassword && (
-                    <p className="form-error">{errors.confirmPassword}</p>
+                    <p className="text-sm text-[#6B2F2F] flex items-center mt-1">
+                      <span className="mr-1">⚠️</span>
+                      {errors.confirmPassword}
+                    </p>
                   )}
                 </div>
 
-                <div className="flex space-x-4">
+                <div className="flex space-x-4 pt-4">
                   <button
                     type="button"
                     onClick={handlePrevious}
-                    className="btn btn-secondary flex-1 py-3"
+                    className="flex-1 py-3 px-6 border-2 border-[#7A7A7A] text-[#7A7A7A] font-semibold rounded-xl hover:bg-[#7A7A7A] hover:text-white transition-all duration-300"
                   >
                     Previous
                   </button>
-                                     <button
-                     type="button"
-                     onClick={handleNext}
-                     disabled={isVerifyingOTP}
-                     className="btn btn-primary flex-1 py-3"
-                   >
-                     {isVerifyingOTP ? (
-                       <div className="flex items-center justify-center">
-                         <div className="spinner h-5 w-5 mr-2"></div>
-                         Sending OTP...
-                       </div>
-                     ) : (
-                       <div className="flex items-center justify-center">
-                         Send OTP
-                         <ArrowRight className="ml-2 h-4 w-4" />
-                       </div>
-                     )}
-                   </button>
+                  <button
+                    type="button"
+                    onClick={handleNext}
+                    disabled={isVerifyingOTP}
+                    className="flex-1 py-3 bg-gradient-to-r from-[#C9A227] to-[#b8911f] hover:from-[#b8911f] hover:to-[#a68019] text-white font-bold rounded-xl shadow-lg transition-all duration-300 transform hover:-translate-y-0.5 hover:shadow-xl disabled:opacity-70 disabled:cursor-not-allowed disabled:transform-none"
+                  >
+                    {isVerifyingOTP ? (
+                      <div className="flex items-center justify-center">
+                        <div className="animate-spin h-5 w-5 border-2 border-white border-t-transparent rounded-full mr-2"></div>
+                        Sending OTP...
+                      </div>
+                    ) : (
+                      <div className="flex items-center justify-center">
+                        <span>Send OTP</span>
+                        <ArrowRight className="ml-2 h-5 w-5" />
+                      </div>
+                    )}
+                  </button>
                 </div>
               </>
             )}
@@ -454,17 +509,25 @@ const Register = () => {
             {/* Step 3: OTP Verification */}
             {step === 3 && (
               <>
-                                 <div className="text-center">
-                   <p className="text-neutral-600 mb-4">
-                     We've sent a 6-digit verification code to <strong>{formData.email}</strong>
-                   </p>
-                   <p className="text-sm text-neutral-500 mb-4">
-                     Please check your email and enter the code below to complete your registration.
-                   </p>
-                 </div>
+                <div className="text-center space-y-4">
+                  <div className="mx-auto w-16 h-16 bg-gradient-to-br from-[#C9A227] to-[#b8911f] rounded-full flex items-center justify-center">
+                    <Mail className="h-8 w-8 text-white" />
+                  </div>
+                  <div>
+                    <p className="text-[#1C1C1C] font-medium mb-2">
+                      Verification code sent!
+                    </p>
+                    <p className="text-[#7A7A7A] text-sm">
+                      We've sent a 6-digit code to <strong className="text-[#C9A227]">{formData.email}</strong>
+                    </p>
+                    <p className="text-sm text-[#7A7A7A] mt-2">
+                      Please check your email and enter the code below to complete registration.
+                    </p>
+                  </div>
+                </div>
 
-                <div>
-                  <label htmlFor="otp" className="form-label">
+                <div className="space-y-2">
+                  <label htmlFor="otp" className="block text-sm font-semibold text-[#1C1C1C] text-center">
                     Verification Code
                   </label>
                   <input
@@ -473,13 +536,20 @@ const Register = () => {
                     type="text"
                     maxLength="6"
                     required
-                    className={`form-input text-center text-lg tracking-widest ${errors.otp ? 'border-error' : ''}`}
+                    className={`w-full py-4 px-4 rounded-xl border-2 ${
+                      errors.otp 
+                        ? 'border-[#6B2F2F] focus:border-[#6B2F2F] focus:ring-[#6B2F2F]' 
+                        : 'border-gray-200 focus:border-[#C9A227] focus:ring-[#C9A227]'
+                    } focus:outline-none focus:ring-2 focus:ring-opacity-20 transition-all duration-300 bg-gray-50 focus:bg-white text-[#1C1C1C] placeholder-[#7A7A7A] text-center text-xl tracking-widest font-bold`}
                     placeholder="000000"
                     value={formData.otp}
                     onChange={handleChange}
                   />
                   {errors.otp && (
-                    <p className="form-error">{errors.otp}</p>
+                    <p className="text-sm text-[#6B2F2F] flex items-center justify-center mt-1">
+                      <span className="mr-1">⚠️</span>
+                      {errors.otp}
+                    </p>
                   )}
                 </div>
 
@@ -488,34 +558,40 @@ const Register = () => {
                     type="button"
                     onClick={resendOTP}
                     disabled={isVerifyingOTP}
-                    className="text-primary-600 hover:text-primary-500 text-sm font-medium"
+                    className="text-[#C9A227] hover:text-[#1C1C1C] text-sm font-semibold transition-colors duration-300 hover:underline"
                   >
                     {isVerifyingOTP ? 'Sending...' : "Didn't receive code? Resend"}
                   </button>
                 </div>
 
-                <div className="flex space-x-4">
+                <div className="flex space-x-4 pt-4">
                   <button
-                    type="button"
-                    onClick={handlePrevious}
-                    className="btn btn-secondary flex-1 py-3"
-                  >
-                    Previous
-                  </button>
-                  <button
-                    type="submit"
-                    disabled={isLoading}
-                    className="btn btn-primary flex-1 py-3"
-                  >
-                                         {isLoading ? (
-                       <div className="flex items-center justify-center">
-                         <div className="spinner h-5 w-5 mr-2"></div>
-                         Creating Account...
-                       </div>
-                     ) : (
-                       'Complete Registration'
-                     )}
-                  </button>
+                  type="button"
+                  onClick={handlePrevious}
+                  className="flex-1 py-3 px-6 border-2 border-[#7A7A7A] text-[#7A7A7A] font-semibold rounded-xl hover:bg-[#7A7A7A] hover:text-white transition-all duration-300 transform hover:-translate-y-0.5 hover:shadow-xl"
+                >
+                  Previous
+                </button>
+
+                <button
+                  type="button"
+                  onClick={handleNext}
+                  disabled={isVerifyingOTP}
+                  className="flex-1 py-3 bg-gradient-to-r from-[#C9A227] to-[#b8911f] hover:from-[#b8911f] hover:to-[#a68019] text-white font-bold rounded-xl shadow-lg transition-all duration-300 transform hover:-translate-y-0.5 hover:shadow-xl disabled:opacity-70 disabled:cursor-not-allowed disabled:transform-none"
+                >
+                  {isVerifyingOTP ? (
+                    <div className="flex items-center justify-center">
+                      <div className="animate-spin h-5 w-5 border-2 border-white border-t-transparent rounded-full mr-2"></div>
+                      Sending OTP...
+                    </div>
+                  ) : (
+                    <div className="flex items-center justify-center">
+                      <span>Send OTP</span>
+                      <ArrowRight className="ml-2 h-5 w-5" />
+                    </div>
+                  )}
+                </button>
+
                 </div>
               </>
             )}
@@ -526,7 +602,7 @@ const Register = () => {
         <div className="text-center">
           <p className="text-neutral-600">
             Already have an account?{' '}
-            <Link to="/login" className="text-primary-600 hover:text-primary-500 font-medium">
+            <Link to="/login" className="text-[#C9A227] hover:text-[#1C1C1C] font-medium transition">
               Sign in here
             </Link>
           </p>

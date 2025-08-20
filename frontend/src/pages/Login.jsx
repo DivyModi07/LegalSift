@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Eye, EyeOff, Mail, Lock, ArrowLeft } from 'lucide-react';
+import { Eye, EyeOff, Mail, Lock, ArrowLeft, Scale } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import useAuthStore from '../store/authStore';
 
@@ -46,7 +46,6 @@ const Login = () => {
       
       if (result.success) {
         toast.success('Login successful!');
-        // Re-check role from the store state after successful login
         const userRole = useAuthStore.getState().userRole;
         if (userRole === 'admin') {
           navigate('/admin/complaints');
@@ -55,7 +54,6 @@ const Login = () => {
         }
       }
     } catch (error) {
-      // The error thrown from the store will be caught here
       toast.error(error.message || 'Invalid email or password. Please try again.');
     }
   };
@@ -67,7 +65,6 @@ const Login = () => {
       [name]: value
     }));
     
-    // Clear error when user starts typing
     if (errors[name]) {
       setErrors(prev => ({
         ...prev,
@@ -77,125 +74,157 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen bg-neutral-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8">
-        {/* Header */}
-        <div className="text-center">
-          <Link to="/" className="inline-flex items-center text-primary-600 hover:text-primary-500 mb-6">
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Back to Home
-          </Link>
-          
-          <h2 className="text-3xl font-bold text-neutral-900 mb-2">
-            Welcome back
-          </h2>
-          <p className="text-neutral-600">
-            Sign in to your account to continue
-          </p>
+    <div className="min-h-screen flex items-center justify-center bg-[#FAFAF5] px-6 py-12 relative overflow-hidden">
+      {/* Subtle Background Pattern */}
+      <div className="absolute inset-0 opacity-[0.02]">
+        <div className="absolute top-0 left-0 w-full h-full bg-repeat opacity-50" 
+             style={{
+               backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23C9A227' fill-opacity='0.1'%3E%3Cpath d='M30 30c0-11.046 8.954-20 20-20s20 8.954 20 20-8.954 20-20 20-20-8.954-20-20z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`
+             }}>
+        </div>
+      </div>
+
+      {/* Main Login Container */}
+      <div className="max-w-md w-full space-y-8 bg-white shadow-2xl rounded-3xl p-10 border border-gray-100 relative z-10 backdrop-blur-sm">
+        
+        {/* Header Section */}
+        <div className="text-center space-y-6">
+          {/* Back to Home Link */}
+          <div className="flex justify-start">
+            <Link 
+              to="/" 
+              className="inline-flex items-center text-[#7A7A7A] hover:text-[#C9A227] transition-colors duration-300 group"
+            >
+              <ArrowLeft className="h-4 w-4 mr-2 group-hover:-translate-x-1 transition-transform duration-300" />
+              <span className="text-sm font-medium">Back to Home</span>
+            </Link>
+          </div>
+
+          {/* Logo and Title */}
+          <div className="space-y-4">
+            <div className="mx-auto w-16 h-16 bg-gradient-to-br from-[#C9A227] to-[#b8911f] rounded-2xl flex items-center justify-center shadow-lg">
+              <Scale className="h-8 w-8 text-white" />
+            </div>
+            
+            <div>
+              <h1 className="text-3xl font-bold text-[#1C1C1C] mb-3 tracking-tight">
+                Welcome Back
+              </h1>
+              <p className="text-[#7A7A7A] text-base leading-relaxed">
+                Sign in to continue your legal journey with 
+                <span className="text-[#C9A227] font-semibold"> LegalSift</span>
+              </p>
+            </div>
+          </div>
         </div>
 
         {/* Login Form */}
-        <div className="card p-8">
-          <form onSubmit={handleSubmit} className="space-y-6" noValidate>
-            {/* Email Field */}
-            <div>
-              <label htmlFor="email" className="form-label">
-                Email Address
-              </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Mail className="h-5 w-5 text-neutral-400" />
-                </div>
-                <input
-                  id="email"
-                  name="email"
-                  type="email"
-                  autoComplete="email"
-                  required
-                  className={`form-input pl-10 ${errors.email ? 'border-error' : ''}`}
-                  placeholder="Enter your email"
-                  value={formData.email}
-                  onChange={handleChange}
-                />
-              </div>
-              {errors.email && (
-                <p className="form-error">{errors.email}</p>
-              )}
+        <form onSubmit={handleSubmit} className="space-y-6 mt-8" noValidate>
+          
+          {/* Email Field */}
+          <div className="space-y-2">
+            <label htmlFor="email" className="block text-sm font-semibold text-[#1C1C1C]">
+              Email Address
+            </label>
+            <div className="relative group">
+              <Mail className="absolute inset-y-0 left-4 h-5 w-5 text-[#7A7A7A] my-auto group-focus-within:text-[#C9A227] transition-colors duration-300" />
+              <input
+                id="email"
+                name="email"
+                type="email"
+                autoComplete="email"
+                required
+                className={`w-full pl-12 pr-4 py-4 rounded-xl border-2 ${
+                  errors.email 
+                    ? 'border-[#6B2F2F] focus:border-[#6B2F2F] focus:ring-[#6B2F2F]' 
+                    : 'border-gray-200 focus:border-[#C9A227] focus:ring-[#C9A227]'
+                } focus:outline-none focus:ring-2 focus:ring-opacity-20 transition-all duration-300 bg-gray-50 focus:bg-white text-[#1C1C1C] placeholder-[#7A7A7A]`}
+                placeholder="Enter your email address"
+                value={formData.email}
+                onChange={handleChange}
+              />
             </div>
+            {errors.email && (
+              <p className="text-sm text-[#6B2F2F] flex items-center mt-1">
+                <span className="mr-1">⚠️</span>
+                {errors.email}
+              </p>
+            )}
+          </div>
 
-            {/* Password Field */}
-            <div>
-              <label htmlFor="password" className="form-label">
-                Password
-              </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Lock className="h-5 w-5 text-neutral-400" />
-                </div>
-                <input
-                  id="password"
-                  name="password"
-                  type={showPassword ? 'text' : 'password'}
-                  autoComplete="current-password"
-                  required
-                  className={`form-input pl-10 pr-10 ${errors.password ? 'border-error' : ''}`}
-                  placeholder="Enter your password"
-                  value={formData.password}
-                  onChange={handleChange}
-                />
-                <button
-                  type="button"
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center"
-                  onClick={() => setShowPassword(!showPassword)}
-                >
-                  {showPassword ? (
-                    <EyeOff className="h-5 w-5 text-neutral-400" />
-                  ) : (
-                    <Eye className="h-5 w-5 text-neutral-400" />
-                  )}
-                </button>
-              </div>
-              {errors.password && (
-                <p className="form-error">{errors.password}</p>
-              )}
-            </div>
-
-            {/* Forgot Password Link */}
-            <div className="flex items-center justify-between">
-              <span className="text-sm text-neutral-500">
-                Having trouble signing in?
-              </span>
-              <Link 
-                to="/forgot-password" 
-                className="text-sm text-primary-600 hover:text-primary-500 font-medium"
+          {/* Password Field */}
+          <div className="space-y-2">
+            <label htmlFor="password" className="block text-sm font-semibold text-[#1C1C1C]">
+              Password
+            </label>
+            <div className="relative group">
+              <Lock className="absolute inset-y-0 left-4 h-5 w-5 text-[#7A7A7A] my-auto group-focus-within:text-[#C9A227] transition-colors duration-300" />
+              <input
+                id="password"
+                name="password"
+                type={showPassword ? 'text' : 'password'}
+                autoComplete="current-password"
+                required
+                className={`w-full pl-12 pr-12 py-4 rounded-xl border-2 ${
+                  errors.password 
+                    ? 'border-[#6B2F2F] focus:border-[#6B2F2F] focus:ring-[#6B2F2F]' 
+                    : 'border-gray-200 focus:border-[#C9A227] focus:ring-[#C9A227]'
+                } focus:outline-none focus:ring-2 focus:ring-opacity-20 transition-all duration-300 bg-gray-50 focus:bg-white text-[#1C1C1C] placeholder-[#7A7A7A]`}
+                placeholder="Enter your password"
+                value={formData.password}
+                onChange={handleChange}
+              />
+              <button
+                type="button"
+                className="absolute inset-y-0 right-4 flex items-center text-[#7A7A7A] hover:text-[#C9A227] transition-colors duration-300"
+                onClick={() => setShowPassword(!showPassword)}
               >
-                Forgot your password?
-              </Link>
+                {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+              </button>
             </div>
+            {errors.password && (
+              <p className="text-sm text-[#6B2F2F] flex items-center mt-1">
+                <span className="mr-1">⚠️</span>
+                {errors.password}
+              </p>
+            )}
+          </div>
 
-            {/* Submit Button */}
-            <button
-              type="submit"
-              disabled={isLoading}
-              className="btn btn-primary w-full py-3"
+          {/* Forgot Password */}
+          <div className="flex items-center justify-between text-sm pt-2">
+            <span className="text-[#7A7A7A]">Having trouble signing in?</span>
+            <Link 
+              to="/forgot-password" 
+              className="font-semibold text-[#C9A227] hover:text-[#1C1C1C] transition-colors duration-300 hover:underline"
             >
-              {isLoading ? (
-                <div className="flex items-center justify-center">
-                  <div className="spinner h-5 w-5 mr-2"></div>
-                  Signing in...
-                </div>
-              ) : (
-                'Sign In'
-              )}
-            </button>
-          </form>
-        </div>
+              Reset password
+            </Link>
+          </div>
 
-        {/* Sign Up Link */}
+          {/* Submit Button */}
+          <button
+            type="submit"
+            disabled={isLoading}
+            className="w-full py-4 bg-gradient-to-r from-[#C9A227] to-[#b8911f] hover:from-[#b8911f] hover:to-[#a68019] text-white font-bold rounded-xl shadow-lg transition-all duration-300 transform hover:-translate-y-0.5 hover:shadow-xl disabled:opacity-70 disabled:cursor-not-allowed disabled:transform-none"
+          >
+            {isLoading ? (
+              <div className="flex items-center justify-center">
+                <div className="animate-spin h-5 w-5 border-2 border-white border-t-transparent rounded-full mr-3"></div>
+                <span>Signing you in...</span>
+              </div>
+            ) : (
+              <span className="flex items-center justify-center">
+                <Scale className="h-5 w-5 mr-2" />
+                Sign In to LegalSift
+              </span>
+            )}
+          </button>
+        </form>
+
         <div className="text-center">
-          <p className="text-neutral-600">
-            Don't have an account?{' '}
-            <Link to="/register" className="text-primary-600 hover:text-primary-500 font-medium">
+          <p className="text-[#7A7A7A]">
+            Don’t have an account?{' '}
+            <Link to="/register" className="text-[#C9A227] hover:text-[#1C1C1C] font-medium transition">
               Sign up here
             </Link>
           </p>

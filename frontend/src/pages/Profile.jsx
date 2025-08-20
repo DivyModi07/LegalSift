@@ -12,53 +12,54 @@ const Profile = () => {
   const { user } = useAuthStore();
 
   return (
-    <div className="min-h-screen bg-neutral-50">
-      <div className="container-max py-8">
-        {/* Header */}
-        <div className="mb-8">
-          <button
-            onClick={() => navigate(-1)}
-            className="inline-flex items-center text-primary-600 hover:text-primary-500 mb-4"
-          >
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Back
-          </button>
+    <div className="min-h-screen bg-[#FAFAF5] font-inter">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Header Section with Gradient Background */}
+        <div className="relative mb-12 p-8 bg-gradient-to-br from-[#1C1C1C] to-[#2D2D2D] rounded-2xl shadow-xl overflow-hidden">
+          {/* Decorative Elements */}
+          <div className="absolute top-0 right-0 w-64 h-64 bg-[#C9A227] opacity-10 rounded-full -translate-y-32 translate-x-32"></div>
+          <div className="absolute bottom-0 left-0 w-48 h-48 bg-[#C9A227] opacity-10 rounded-full translate-y-24 -translate-x-24"></div>
           
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl font-bold text-neutral-900 mb-2">
-                Profile Settings
-              </h1>
-              <p className="text-neutral-600">
-                View your account information.
-              </p>
-            </div>
+          <div className="relative z-10">
+           
+            <h1 className="text-4xl font-bold text-white mb-3">
+              Profile <span className="text-[#C9A227]">Settings</span>
+            </h1>
+            <p className="text-gray-300 text-lg">
+              View your account information
+            </p>
           </div>
         </div>
 
         <div className="max-w-2xl mx-auto">
-          <div className="card p-8">
-            <div className="space-y-6">
-              {/* Personal Information */}
-              <div className="space-y-4">
-                <h3 className="text-lg font-semibold text-neutral-900 mb-4">
-                  Personal Information
-                </h3>
-                
+          {/* Profile Card */}
+          <div className="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
+            {/* Card Header */}
+            <div className="bg-gradient-to-r from-[#1C1C1C] to-[#2D2D2D] px-8 py-6">
+              <h2 className="text-2xl font-bold text-white mb-2 flex items-center">
+                <User className="h-8 w-8 text-[#C9A227] mr-3" />
+                Personal Information
+              </h2>
+              <p className="text-gray-300">Your account details are displayed below.</p>
+            </div>
+
+            {/* Card Content */}
+            <div className="p-8">
+              <div className="space-y-6">
                 <div>
-                  <label htmlFor="name" className="form-label">
+                  <label htmlFor="name" className="block text-sm font-semibold text-[#1C1C1C] mb-3">
                     Full Name
                   </label>
                   <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <User className="h-5 w-5 text-neutral-400" />
+                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                      <User className="h-5 w-5 text-[#C9A227]" />
                     </div>
                     <input
                       id="name"
                       name="name"
                       type="text"
-                      disabled // Always disabled
-                      className="form-input pl-10 bg-neutral-50"
+                      disabled
+                      className="w-full pl-12 pr-4 py-3 border border-gray-200 rounded-xl bg-gray-50 text-[#1C1C1C] font-medium cursor-not-allowed"
                       value={user?.name || ''}
                       readOnly
                     />
@@ -66,19 +67,19 @@ const Profile = () => {
                 </div>
 
                 <div>
-                  <label htmlFor="email" className="form-label">
+                  <label htmlFor="email" className="block text-sm font-semibold text-[#1C1C1C] mb-3">
                     Email Address
                   </label>
                   <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <Mail className="h-5 w-5 text-neutral-400" />
+                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                      <Mail className="h-5 w-5 text-[#C9A227]" />
                     </div>
                     <input
                       id="email"
                       name="email"
                       type="email"
-                      disabled // Always disabled
-                      className="form-input pl-10 bg-neutral-50"
+                      disabled
+                      className="w-full pl-12 pr-4 py-3 border border-gray-200 rounded-xl bg-gray-50 text-[#1C1C1C] font-medium cursor-not-allowed"
                       value={user?.email || ''}
                       readOnly
                     />
@@ -86,19 +87,19 @@ const Profile = () => {
                 </div>
 
                 <div>
-                  <label htmlFor="phone" className="form-label">
+                  <label htmlFor="phone" className="block text-sm font-semibold text-[#1C1C1C] mb-3">
                     Phone Number
                   </label>
                   <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <Phone className="h-5 w-5 text-neutral-400" />
+                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                      <Phone className="h-5 w-5 text-[#C9A227]" />
                     </div>
                     <input
                       id="phone"
                       name="phone"
                       type="tel"
-                      disabled // Always disabled
-                      className="form-input pl-10 bg-neutral-50"
+                      disabled
+                      className="w-full pl-12 pr-4 py-3 border border-gray-200 rounded-xl bg-gray-50 text-[#1C1C1C] font-medium cursor-not-allowed"
                       value={user?.phone_number || ''}
                       readOnly
                     />
@@ -107,6 +108,7 @@ const Profile = () => {
               </div>
             </div>
           </div>
+
         </div>
       </div>
     </div>

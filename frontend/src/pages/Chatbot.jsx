@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
-import { Send, Bot, User, Loader, MessageSquare } from 'lucide-react';
+import { Send, Bot, User, Loader, MessageSquare, ArrowLeft } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import api from '../services/api';
 import { toast } from 'react-hot-toast';
 
@@ -24,7 +25,7 @@ const Chatbot = () => {
   useEffect(() => {
     const timer = setTimeout(() => {
       setLoading(false);
-    }, 1000);
+    }, 500);
     return () => clearTimeout(timer);
   }, []);
 
@@ -95,66 +96,75 @@ const Chatbot = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-neutral-50 flex items-center justify-center">
-        <Loader className="h-8 w-8 animate-spin text-primary-600" />
+      <div className="min-h-screen bg-[#FAFAF5] flex items-center justify-center">
+        <div className="flex flex-col items-center space-y-4">
+          <Loader className="h-12 w-12 animate-spin text-[#C9A227]" />
+          <p className="text-[#7A7A7A] text-lg font-medium">Loading legal assistant...</p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-neutral-50">
-      <div className="container-max py-8">
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-neutral-900 mb-2">
-            Legal Assistant
-          </h1>
-          <p className="text-neutral-600">
-            Get instant answers to your legal questions
-          </p>
+    <div className="min-h-screen bg-[#FAFAF5] font-inter">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Header Section with Gradient Background */}
+        <div className="relative mb-12 p-8 bg-gradient-to-br from-[#1C1C1C] to-[#2D2D2D] rounded-2xl shadow-xl overflow-hidden">
+          {/* Decorative Elements */}
+          <div className="absolute top-0 right-0 w-64 h-64 bg-[#C9A227] opacity-10 rounded-full -translate-y-32 translate-x-32"></div>
+          <div className="absolute bottom-0 left-0 w-48 h-48 bg-[#C9A227] opacity-10 rounded-full translate-y-24 -translate-x-24"></div>
+          
+          <div className="relative z-10">
+            <h1 className="text-4xl font-bold text-white mb-3">
+              Legal <span className="text-[#C9A227]">Assistant</span>
+            </h1>
+            <p className="text-gray-300 text-lg">
+              Get instant answers to your legal questions
+            </p>
+          </div>
         </div>
 
         <div className="max-w-4xl mx-auto">
           {/* Chat Interface */}
-          <div className="card h-[600px] flex flex-col">
+          <div className="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden h-[600px] flex flex-col">
             {/* Chat Header */}
-            <div className="border-b border-neutral-200 p-4">
-              <div className="flex items-center space-x-3">
-                <div className="bg-primary-100 p-2 rounded-lg">
-                  <Bot className="h-6 w-6 text-primary-600" />
+            <div className="bg-gradient-to-r from-[#1C1C1C] to-[#2D2D2D] px-8 py-6">
+              <div className="flex items-center space-x-4">
+                <div className="bg-gradient-to-br from-[#C9A227] to-[#D4B332] p-3 rounded-xl shadow-lg">
+                  <Bot className="h-6 w-6 text-white" />
                 </div>
                 <div>
-                  <h3 className="font-semibold text-neutral-900">Legal Assistant</h3>
-                  <p className="text-sm text-neutral-600">AI-powered legal guidance</p>
+                  <h3 className="text-xl font-bold text-white">Legal Assistant</h3>
+                  <p className="text-gray-300">AI-powered legal guidance</p>
                 </div>
               </div>
             </div>
 
-            {/* **NEW**: The ref is now on the message container div */}
-            <div ref={chatContainerRef} className="flex-1 overflow-y-auto p-4 space-y-4">
+            {/* Messages Container */}
+            <div ref={chatContainerRef} className="flex-1 overflow-y-auto p-6 space-y-6 bg-gradient-to-br from-[#FAFAF5] to-white">
               {messages.map((message) => (
                 <div
                   key={message.id}
                   className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}
                 >
                   <div className={`max-w-[80%] ${message.type === 'user' ? 'order-2' : 'order-1'}`}>
-                    <div className={`flex items-start space-x-2 ${message.type === 'user' ? 'flex-row-reverse space-x-reverse' : ''}`}>
-                      <div className={`p-2 rounded-lg ${message.type === 'user' ? 'bg-primary-500' : 'bg-neutral-100'}`}>
+                    <div className={`flex items-start space-x-3 ${message.type === 'user' ? 'flex-row-reverse space-x-reverse' : ''}`}>
+                      <div className={`p-3 rounded-xl shadow-lg ${message.type === 'user' ? 'bg-gradient-to-br from-[#C9A227] to-[#D4B332]' : 'bg-gradient-to-br from-gray-100 to-gray-200'}`}>
                         {message.type === 'user' ? (
-                          <User className="h-4 w-4 text-white" />
+                          <User className="h-5 w-5 text-white" />
                         ) : (
-                          <Bot className="h-4 w-4 text-neutral-600" />
+                          <Bot className="h-5 w-5 text-[#1C1C1C]" />
                         )}
                       </div>
-                      <div className={`rounded-lg p-3 ${
+                      <div className={`rounded-xl p-4 shadow-lg border ${
                         message.type === 'user' 
-                          ? 'bg-primary-500 text-white' 
-                          : 'bg-neutral-100 text-neutral-900'
+                          ? 'bg-gradient-to-br from-[#C9A227] to-[#D4B332] text-white border-[#C9A227]/20' 
+                          : 'bg-white text-[#1C1C1C] border-gray-200'
                       }`}>
-                        <p className="text-sm leading-relaxed whitespace-pre-wrap">{message.content}</p>
+                        <p className="leading-relaxed whitespace-pre-wrap">{message.content}</p>
                       </div>
                     </div>
-                    <p className={`text-xs mt-1 ${message.type === 'user' ? 'text-right' : 'text-left'} text-neutral-500`}>
+                    <p className={`text-xs mt-2 ${message.type === 'user' ? 'text-right' : 'text-left'} text-[#7A7A7A]`}>
                       {message.timestamp.toLocaleTimeString()}
                     </p>
                   </div>
@@ -163,34 +173,34 @@ const Chatbot = () => {
 
               {/* Typing Indicator */}
               {isTyping && (
-                 <div className="flex justify-start">
-                 <div className="max-w-[80%]">
-                   <div className="flex items-start space-x-2">
-                     <div className="p-2 rounded-lg bg-neutral-100">
-                       <Bot className="h-4 w-4 text-neutral-600" />
-                     </div>
-                     <div className="bg-neutral-100 rounded-lg p-3">
-                       <div className="flex items-center space-x-1">
-                         <Loader className="h-4 w-4 animate-spin text-neutral-600" />
-                         <span className="text-sm text-neutral-600">Typing...</span>
-                       </div>
-                     </div>
-                   </div>
-                 </div>
-               </div>
+                <div className="flex justify-start">
+                  <div className="max-w-[80%]">
+                    <div className="flex items-start space-x-3">
+                      <div className="bg-gradient-to-br from-gray-100 to-gray-200 p-3 rounded-xl shadow-lg">
+                        <Bot className="h-5 w-5 text-[#1C1C1C]" />
+                      </div>
+                      <div className="bg-white rounded-xl p-4 shadow-lg border border-gray-200">
+                        <div className="flex items-center space-x-2">
+                          <Loader className="h-4 w-4 animate-spin text-[#C9A227]" />
+                          <span className="text-[#7A7A7A]">Typing...</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               )}
             </div>
 
             {/* Input Area */}
-            <div className="border-t border-neutral-200 p-4">
-              <div className="flex space-x-3">
+            <div className="border-t border-gray-200 p-6 bg-white">
+              <div className="flex space-x-4">
                 <div className="flex-1 relative">
                   <textarea
                     value={inputMessage}
                     onChange={(e) => setInputMessage(e.target.value)}
                     onKeyPress={handleKeyPress}
                     placeholder="Type your legal question here..."
-                    className="form-input resize-none pr-12"
+                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#C9A227] focus:border-[#C9A227] transition-all duration-200 resize-none bg-white text-[#1C1C1C] placeholder-[#7A7A7A]"
                     rows={2}
                     disabled={isTyping}
                   />
@@ -198,21 +208,21 @@ const Chatbot = () => {
                 <button
                   onClick={handleSendMessage}
                   disabled={!inputMessage.trim() || isTyping}
-                  className="btn btn-primary px-4 self-end"
+                  className="self-end px-6 py-3 bg-gradient-to-r from-[#C9A227] to-[#D4B332] text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-lg"
                 >
-                  <Send className="h-4 w-4" />
+                  <Send className="h-5 w-5" />
                 </button>
               </div>
             </div>
           </div>
 
           {/* Information Box */}
-          <div className="mt-6 card p-6 bg-blue-50 border-blue-200">
-            <div className="flex items-start space-x-3">
-              <MessageSquare className="h-6 w-6 text-blue-600 flex-shrink-0 mt-0.5" />
+          <div className="mt-8 bg-yellow-50 border-l-4 border-yellow-500 rounded-xl p-6 shadow-md">
+            <div className="flex items-start space-x-4">
+              <MessageSquare className="h-10 w-10 text-yellow-800" />
               <div>
-                <h3 className="font-semibold text-blue-900 mb-2">Important Notice</h3>
-                <p className="text-blue-800 text-sm leading-relaxed">
+                <h3 className="font-semibold text-yellow-800 mb-2">Important Notice</h3>
+                <p className="text-yellow-700 text-sm leading-relaxed">
                   This AI assistant provides general legal information for educational purposes only. 
                   It does not constitute legal advice. For specific legal matters, please consult a qualified lawyer. 
                   In emergencies, contact your nearest police station immediately.
