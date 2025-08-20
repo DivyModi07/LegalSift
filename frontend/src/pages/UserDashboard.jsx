@@ -26,13 +26,18 @@ const UserDashboard = () => {
   const [complaints, setComplaints] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
-  const [expandedId, setExpandedId] = useState(null); // State to track expanded card
+  const [expandedId, setExpandedId] = useState(null);
+  
+  // State for the "Load More" functionality
+  const [visibleCount, setVisibleCount] = useState(5);
 
   useEffect(() => {
     const fetchHistory = async () => {
       try {
         const data = await complaintService.getComplaintHistory();
-        setComplaints(data);
+        // Sort complaints by creation date, newest first
+        const sortedData = data.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+        setComplaints(sortedData);
       } catch (error) {
         toast.error('Could not fetch complaint history.');
       } finally {
@@ -42,7 +47,6 @@ const UserDashboard = () => {
     fetchHistory();
   }, []);
 
-  // Simplified filter logic - only searches now
   const filteredComplaints = complaints.filter(complaint => {
     const complaintText = complaint.complaint_text || '';
     const category = complaint.predicted_category || '';
@@ -51,7 +55,14 @@ const UserDashboard = () => {
            category.toLowerCase().includes(searchTerm.toLowerCase());
   });
 
-  // Function to toggle the expanded view
+  // Slice the complaints to only show the visible amount
+  const complaintsToShow = filteredComplaints.slice(0, visibleCount);
+
+  const handleLoadMore = () => {
+    // Increase the number of visible complaints by 5
+    setVisibleCount(prevCount => prevCount + 5);
+  };
+
   const toggleDetails = (id) => {
     setExpandedId(expandedId === id ? null : id);
   };
@@ -128,7 +139,6 @@ const UserDashboard = () => {
               <h2 className="text-2xl font-bold text-neutral-900 mb-2">Your Complaints</h2>
               <p className="text-neutral-600">Track the status and details of your submitted complaints.</p>
             </div>
-            {/* Search Bar - Now the only filter option */}
             <div className="relative mt-4 md:mt-0">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-neutral-400" />
               <input
@@ -155,9 +165,8 @@ const UserDashboard = () => {
             </div>
           ) : (
             <div className="space-y-4">
-              {filteredComplaints.map((complaint) => (
+              {complaintsToShow.map((complaint) => (
                 <div key={complaint.id} className="border border-neutral-200 rounded-lg p-6 hover:shadow-soft transition-all duration-200">
-                  {/* Main Complaint Card */}
                   <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4">
                     <div className="flex-1">
                       <div className="flex items-start justify-between mb-3">
@@ -189,7 +198,6 @@ const UserDashboard = () => {
                     </div>
                   </div>
 
-                  {/* Expanded Detail Section */}
                   {expandedId === complaint.id && (
                     <div className="mt-6 pt-4 border-t border-neutral-200">
                       <h4 className="font-semibold mb-2 text-neutral-800">Full Complaint Details:</h4>
@@ -213,6 +221,15 @@ const UserDashboard = () => {
                   )}
                 </div>
               ))}
+
+              {/* Load More Button */}
+              {visibleCount < filteredComplaints.length && (
+                <div className="text-center mt-6">
+                  <button onClick={handleLoadMore} className="btn btn-primary">
+                    Load More Complaints
+                  </button>
+                </div>
+              )}
             </div>
           )}
         </div>

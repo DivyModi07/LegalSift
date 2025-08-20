@@ -1,14 +1,7 @@
 # location: backend/apps/users/urls.py
 
 from django.urls import path
-from .views import (
-    UserRegistrationView, 
-    UserLoginView,
-    send_otp_email,
-    verify_otp,
-    reset_password,
-    check_email_phone
-)
+from .views import (UserRegistrationView, UserLoginView, send_otp_email, verify_otp, reset_password,check_email_phone) 
 from rest_framework_simplejwt.views import TokenRefreshView
 
 # This list MUST be named 'urlpatterns'

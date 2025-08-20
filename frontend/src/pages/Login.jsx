@@ -12,7 +12,7 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [errors, setErrors] = useState({});
   
-  const { login, isLoading, userRole } = useAuthStore();
+  const { login, isLoading } = useAuthStore();
   const navigate = useNavigate();
 
   const validateForm = () => {
@@ -42,27 +42,21 @@ const Login = () => {
     }
     
     try {
-      console.log('Starting login process...');
       const result = await login(formData.email, formData.password);
-      console.log('Login result received:', result);
       
       if (result.success) {
         toast.success('Login successful!');
-        // Redirect based on user role
+        // Re-check role from the store state after successful login
+        const userRole = useAuthStore.getState().userRole;
         if (userRole === 'admin') {
           navigate('/admin/complaints');
         } else {
           navigate('/dashboard');
         }
-      } else {
-        // Show notification for wrong credentials
-        console.log('Login failed, showing error notification');
-        toast.error('Invalid email or password. Please try again.');
       }
     } catch (error) {
-      console.log('Login error caught:', error);
-      // Show notification for any error
-      toast.error('Invalid email or password. Please try again.');
+      // The error thrown from the store will be caught here
+      toast.error(error.message || 'Invalid email or password. Please try again.');
     }
   };
 
@@ -195,8 +189,6 @@ const Login = () => {
               )}
             </button>
           </form>
-
-
         </div>
 
         {/* Sign Up Link */}

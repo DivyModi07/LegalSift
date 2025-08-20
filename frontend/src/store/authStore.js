@@ -24,33 +24,24 @@ const useAuthStore = create(
       login: async (email, password) => {
         set({ isLoading: true });
         try {
-          console.log('Attempting login with email:', email);
           const result = await loginUser(email, password);
-          console.log('Login result:', result);
           
           if (result.success) {
-            console.log('Login successful, data:', result.data);
-            
-            // Check if we have the expected data structure
             if (!result.data || !result.data.user || !result.data.access) {
-              console.error('Invalid login response structure:', result.data);
-              set({ isLoading: false });
-              return { success: false, error: 'Invalid response from server' };
+              throw new Error('Invalid response from server');
             }
             
-            // Store tokens
             localStorage.setItem('access_token', result.data.access);
             localStorage.setItem('refresh_token', result.data.refresh);
             
-            // Set user data
             const user = {
               id: result.data.user.id,
+              first_name: result.data.user.first_name,
               name: `${result.data.user.first_name} ${result.data.user.last_name}`,
               email: result.data.user.email,
-              role: result.data.user.role || 'user', // Use role from backend or default to 'user'
+              phone_number: result.data.user.phone_number,
+              role: result.data.user.role || 'user',
             };
-            
-            console.log('Setting user data:', user);
             
             set({
               user,
@@ -60,13 +51,14 @@ const useAuthStore = create(
             });
             return { success: true };
           } else {
-            set({ isLoading: false });
-            return { success: false, error: result.error };
+            // This is the important change: throw an error on failure
+            throw new Error(result.error);
           }
         } catch (error) {
           console.error('Login error in store:', error);
           set({ isLoading: false });
-          return { success: false, error: error.message };
+          // Re-throw the error so the component can catch it
+          throw error;
         }
       },
       
@@ -94,11 +86,13 @@ const useAuthStore = create(
             
             // Set user data
             const user = {
-              id: result.data.user.id,
-              name: `${result.data.user.first_name} ${result.data.user.last_name}`,
-              email: result.data.user.email,
-              role: result.data.user.role || 'user', // Use role from backend or default to 'user'
-            };
+            id: result.data.user.id,
+            first_name: result.data.user.first_name,
+            name: `${result.data.user.first_name} ${result.data.user.last_name}`,
+            email: result.data.user.email,
+            phone_number: result.data.user.phone_number, // <-- ADD THIS
+            role: result.data.user.role || 'user',
+          };
             
             console.log('Setting user data:', user);
             
@@ -196,10 +190,10 @@ const useAuthStore = create(
     {
       name: 'auth-storage',
       partialize: (state) => ({
-        user: state.user,
-        isAuthenticated: state.isAuthenticated,
-        userRole: state.userRole,
-      }),
+      user: state.user,
+      isAuthenticated: state.isAuthenticated,
+      userRole: state.userRole,
+    }),
     }
   )
 );

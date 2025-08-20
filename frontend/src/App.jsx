@@ -3,6 +3,9 @@ import { Toaster } from 'react-hot-toast';
 import { useEffect } from 'react';
 import useAuthStore from './store/authStore';
 
+// Import the new component
+import ScrollToTop from './components/ScrollToTop';
+
 // Layout Components
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
@@ -21,6 +24,9 @@ import AdminAnalytics from './pages/AdminAnalytics';
 import AdminLawyers from './pages/AdminLawyers';
 import LawyerApplication from './pages/LawyerApplication';
 import Profile from './pages/Profile';
+// Import the two new pages
+import PrivacyPolicy from './pages/PrivacyPolicy';
+import TermsOfService from './pages/TermsOfService';
 
 // Protected Route Component
 const ProtectedRoute = ({ children, allowedRoles = [] }) => {
@@ -53,7 +59,7 @@ const HomeRoute = () => {
 };
 
 function App() {
-  const { isAuthenticated, userRole, checkAuth } = useAuthStore();
+  const { checkAuth } = useAuthStore();
   
   // Check authentication on app load
   useEffect(() => {
@@ -62,6 +68,7 @@ function App() {
 
   return (
     <Router>
+      <ScrollToTop />
       <div className="min-h-screen bg-neutral-50 flex flex-col">
         <Navbar />
         
@@ -74,6 +81,9 @@ function App() {
             <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/ipc-explorer" element={<IPCExplorer />} />
             <Route path="/lawyer-application" element={<LawyerApplication />} />
+            {/* Add the new routes here */}
+            <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+            <Route path="/terms-of-service" element={<TermsOfService />} />
             
             {/* Protected User Routes */}
             <Route 

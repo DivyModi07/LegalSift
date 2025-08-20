@@ -82,7 +82,6 @@ INSTALLED_APPS = [
 
     'apps.users.apps.UsersConfig',
     'apps.complaints.apps.ComplaintsConfig',
-    'apps.dashboard.apps.DashboardConfig',
     'apps.mlengine.apps.MlengineConfig',
 ]
 

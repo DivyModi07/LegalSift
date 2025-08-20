@@ -1,32 +1,32 @@
 import { Link } from 'react-router-dom';
-import { Scale, AlertTriangle } from 'lucide-react';
+import { Scale, AlertTriangle, Mail, Phone, MapPin } from 'lucide-react';
 import useAuthStore from '../store/authStore';
 
 const Footer = () => {
   const { isAuthenticated, userRole } = useAuthStore();
 
   const getQuickLinks = () => {
+    if (isAuthenticated && userRole === 'user') {
+      return [
+        { to: '/dashboard', label: 'Dashboard' },
+        { to: '/submit-complaint', label: 'Submit Complaint' },
+        { to: '/ipc-explorer', label: 'IPC Explorer' },
+        { to: '/chatbot', label: 'Legal Assistant' },
+      ];
+    }
     if (isAuthenticated && userRole === 'admin') {
       return [
         { to: '/admin/complaints', label: 'Recent Complaints' },
         { to: '/admin/analytics', label: 'Analytics' },
         { to: '/admin/lawyers', label: 'Lawyer Management' },
       ];
-    } else if (isAuthenticated && userRole === 'user') {
-      return [
-        { to: '/submit-complaint', label: 'Submit Complaint' },
-        { to: '/chatbot', label: 'Legal Assistant' },
-        { to: '/dashboard', label: 'Dashboard' },
-        { to: '/ipc-explorer', label: 'IPC Explorer' },
-      ];
-    } else {
-      return [
-        { to: '/submit-complaint', label: 'Submit Complaint' },
-        { to: '/ipc-explorer', label: 'IPC Explorer' },
-        { to: '/chatbot', label: 'Legal Assistant' },
-        { to: '/lawyer-application', label: 'Apply as Lawyer' },
-      ];
     }
+    return [
+      { to: '/', label: 'Home' },
+      { to: '/ipc-explorer', label: 'IPC Explorer' },
+      { to: '/lawyer-application', label: 'Apply as Lawyer' },
+      { to: '/login', label: 'Login' },
+    ];
   };
 
   const quickLinks = getQuickLinks();
@@ -34,7 +34,7 @@ const Footer = () => {
   return (
     <footer className="bg-gradient-to-r from-primary-800 to-primary-900 text-white">
       <div className="container-max py-8">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 lg:gap-12">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-8 lg:gap-12">
           {/* Brand Section */}
           <div className="md:col-span-1">
             <div className="flex items-center space-x-2 mb-4">
@@ -62,6 +62,25 @@ const Footer = () => {
             </div>
           </div>
 
+          {/* Contact Us Section */}
+          <div className="md:col-span-1">
+            <h3 className="text-sm font-semibold text-white mb-4">Contact Us</h3>
+            <div className="flex flex-col space-y-3 text-sm">
+                <div className="flex items-start">
+                    <Mail className="h-4 w-4 mr-2 mt-1 flex-shrink-0 text-primary-200" />
+                    <span className="text-primary-100">support@legalsift.com</span>
+                </div>
+                <div className="flex items-start">
+                    <Phone className="h-4 w-4 mr-2 mt-1 flex-shrink-0 text-primary-200" />
+                    <span className="text-primary-100">+91 12345 67890</span>
+                </div>
+                <div className="flex items-start">
+                    <MapPin className="h-4 w-4 mr-2 mt-1 flex-shrink-0 text-primary-200" />
+                    <span className="text-primary-100">Ahmedabad, India</span>
+                </div>
+            </div>
+          </div>
+
           {/* Legal Notice */}
           <div className="md:col-span-1">
             <div className="bg-white/10 rounded-xl p-4 border border-white/20">
@@ -83,13 +102,14 @@ const Footer = () => {
         <div className="border-t border-white/20 mt-8 pt-6">
           <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
             <p className="text-primary-200 text-sm">
-              © 2024 LegalSift. All rights reserved.
+              © {new Date().getFullYear()} LegalSift. All rights reserved.
             </p>
             <div className="flex space-x-6 text-sm">
-              <Link to="/privacy" className="text-primary-200 hover:text-white transition-colors">
+              {/* Corrected links */}
+              <Link to="/privacy-policy" className="text-primary-200 hover:text-white transition-colors">
                 Privacy Policy
               </Link>
-              <Link to="/terms" className="text-primary-200 hover:text-white transition-colors">
+              <Link to="/terms-of-service" className="text-primary-200 hover:text-white transition-colors">
                 Terms of Service
               </Link>
             </div>

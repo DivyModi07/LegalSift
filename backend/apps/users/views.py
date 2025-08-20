@@ -13,6 +13,7 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from .serializers import UserSerializer
 from django.conf import settings
 
+from rest_framework.permissions import IsAuthenticated
 
 # Get your custom user model
 User = get_user_model()
@@ -54,7 +55,6 @@ class UserRegistrationView(generics.CreateAPIView):
         request.session.pop('otp_email', None)
         request.session.pop('otp_time', None)
         
-        # Return response with tokens and user data
         return Response({
             'refresh': str(refresh),
             'access': str(refresh.access_token),
@@ -63,7 +63,8 @@ class UserRegistrationView(generics.CreateAPIView):
                 'email': user.email,
                 'first_name': user.first_name,
                 'last_name': user.last_name,
-                'role': 'user',  # New registrations are always regular users
+                'phone_number': user.phone_number,
+                'role': 'user',
             }
         }, status=status.HTTP_201_CREATED)
 
@@ -100,16 +101,17 @@ class UserLoginView(APIView):
                 role = 'user'
             
             return Response({
-                'refresh': str(refresh),
-                'access': str(refresh.access_token),
-                'user': {
-                    'id': user.id,
-                    'email': user.email,
-                    'first_name': user.first_name,
-                    'last_name': user.last_name,
-                    'role': role,
-                }
-            }, status=status.HTTP_200_OK)
+            'refresh': str(refresh),
+            'access': str(refresh.access_token),
+            'user': {
+                'id': user.id,
+                'email': user.email,
+                'first_name': user.first_name,
+                'last_name': user.last_name,
+                'phone_number': user.phone_number,  # <-- ADD THIS LINE
+                'role': role,
+            }
+        }, status=status.HTTP_200_OK)
         
         return Response({"error": "Invalid credentials"}, status=status.HTTP_401_UNAUTHORIZED)
 
@@ -234,3 +236,5 @@ def reset_password(request):
         return Response({"error": "User not found."}, status=status.HTTP_404_NOT_FOUND)
     except Exception as e:
         return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    
+

@@ -1,64 +1,3 @@
-# from .paths import EMBED_DIR
-# from langchain_community.vectorstores import FAISS
-# from langchain_community.embeddings import HuggingFaceEmbeddings
-# from langchain_openai.chat_models import ChatOpenAI
-# from langchain.chains import RetrievalQA
-# from langchain.prompts import PromptTemplate
-
-
-# embedding_model = HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")
-
-# vectordb = FAISS.load_local(
-#     str(EMBED_DIR),
-#     embeddings=embedding_model,
-#     allow_dangerous_deserialization=True,
-# )
-
-# prompt = PromptTemplate.from_template(
-#     """
-#     You are an assistant for Indian Penal Code (IPC) legal queries.
-#     Use ONLY the following context to answer.
-
-#     If the exact section is found, extract:
-#     - Section Number
-#     - Title
-#     - Short Description
-#     - Punishment
-#     - Bailability
-#     - Jurisdiction
-#     - Summary (from full text)
-
-#     If the section is not present in context, answer:
-#     "This section is not available in the dataset."
-
-#     Context:
-#     {context}
-
-#     Question: {question}
-#     Answer:
-#     """
-# )
-
-
-# retriever = vectordb.as_retriever(search_kwargs={"k": 4})
-
-# # ✅ Use mistral-7b-instruct from OpenRouter
-# llm = ChatOpenAI(
-#     model="mistralai/mistral-7b-instruct",
-#     temperature=0.1
-# )
-
-# qa_chain = RetrievalQA.from_chain_type(
-#     llm=llm,
-#     chain_type="stuff",
-#     retriever=retriever,
-#     chain_type_kwargs={"prompt": prompt},
-# )
-
-# def ask(query: str) -> dict:
-#     return qa_chain({"query": query})
-
-
 from langchain_community.vectorstores import FAISS
 from langchain_community.embeddings import HuggingFaceEmbeddings
 from langchain_openai import ChatOpenAI
@@ -124,13 +63,18 @@ def ask_with_memory(query: str, chat_history: list = []):
         memory.chat_memory.add_user_message(user_msg)
         memory.chat_memory.add_ai_message(ai_msg)
 
-    # Define the prompt for the LLM
+    # Define the improved prompt for the LLM
     prompt = PromptTemplate.from_template(
         """
-        You are an assistant for Indian Penal Code (IPC) legal queries.
-        Use the following pieces of retrieved context and the chat history to answer the question.
-        If you don't know the answer, just say that you don't know. Don't try to make up an answer.
-        Keep the answer concise.
+        You are LegalSift, a specialized AI assistant expert in the Indian Penal Code (IPC). 
+        Your sole purpose is to provide information based ONLY on the provided legal context about Indian law.
+
+        **CRITICAL INSTRUCTIONS:**
+        1. **Strictly On-Topic:** Analyze the user's 'QUESTION'. If it is NOT related to the Indian Penal Code or Indian law, you MUST decline to answer.
+        2. **Mandatory Response for Off-Topic Questions:** For any off-topic question (e.g., about nutrition, sports, history, etc.), respond ONLY with: "I am a legal assistant focused on the Indian Penal Code and cannot answer questions outside of this scope."
+        3. **Use Context Only:** If the question is on-topic, you MUST base your answer exclusively on the legal text provided in the 'CONTEXT' section below. Do not use any external knowledge.
+        4. **Acknowledge Limits:** If the provided 'CONTEXT' does not contain the answer to a legal question, state that you do not have enough information in the provided documents to answer. Do not guess.
+        5. **Be Concise:** Keep your answers direct and to the point.
 
         CONTEXT: {context}
         CHAT HISTORY: {chat_history}

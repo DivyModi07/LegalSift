@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { Menu, X, User, LogOut, Shield, Scale, FileText, BarChart3, Users } from 'lucide-react';
+import { Menu, X, User, LogOut, Shield, Scale } from 'lucide-react';
 import useAuthStore from '../store/authStore';
 
 const Navbar = () => {
@@ -16,6 +16,33 @@ const Navbar = () => {
 
   const isActive = (path) => location.pathname === path;
 
+  const NavLink = ({ to, children }) => (
+    <Link
+      to={to}
+      className={`text-sm font-medium transition-colors ${
+        isActive(to)
+          ? 'text-primary-500'
+          : 'text-neutral-600 hover:text-primary-500'
+      }`}
+    >
+      {children}
+    </Link>
+  );
+
+  const MobileNavLink = ({ to, children }) => (
+    <Link
+      to={to}
+      className={`block px-3 py-2 text-sm font-medium rounded-lg transition-colors ${
+        isActive(to)
+          ? 'text-primary-500 bg-primary-50'
+          : 'text-neutral-600 hover:text-primary-500 hover:bg-neutral-50'
+      }`}
+      onClick={() => setIsMobileMenuOpen(false)}
+    >
+      {children}
+    </Link>
+  );
+
   return (
     <nav className="bg-white shadow-soft border-b border-neutral-200">
       <div className="container-max">
@@ -28,89 +55,30 @@ const Navbar = () => {
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-8">
-            {!isAuthenticated || userRole !== 'admin' ? (
+            {/* Logged-out User Links */}
+            {!isAuthenticated && (
               <>
-                <Link
-                  to="/"
-                  className={`text-sm font-medium transition-colors ${
-                    isActive('/') 
-                      ? 'text-primary-500' 
-                      : 'text-neutral-600 hover:text-primary-500'
-                  }`}
-                >
-                  Home
-                </Link>
-                
-                <Link
-                  to="/ipc-explorer"
-                  className={`text-sm font-medium transition-colors ${
-                    isActive('/ipc-explorer') 
-                      ? 'text-primary-500' 
-                      : 'text-neutral-600 hover:text-primary-500'
-                  }`}
-                >
-                  IPC Explorer
-                </Link>
-              </>
-            ) : null}
-
-            {isAuthenticated && userRole === 'user' && (
-              <>
-                <Link
-                  to="/submit-complaint"
-                  className={`text-sm font-medium transition-colors ${
-                    isActive('/submit-complaint') 
-                      ? 'text-primary-500' 
-                      : 'text-neutral-600 hover:text-primary-500'
-                  }`}
-                >
-                  Submit Complaint
-                </Link>
-                <Link
-                  to="/chatbot"
-                  className={`text-sm font-medium transition-colors ${
-                    isActive('/chatbot') 
-                      ? 'text-primary-500' 
-                      : 'text-neutral-600 hover:text-primary-500'
-                  }`}
-                >
-                  Legal Assistant
-                </Link>
+                <NavLink to="/">Home</NavLink>
+                <NavLink to="/ipc-explorer">IPC Explorer</NavLink>
               </>
             )}
 
+            {/* Logged-in Regular User Links */}
+            {isAuthenticated && userRole === 'user' && (
+              <>
+                <NavLink to="/dashboard">Home</NavLink>
+                <NavLink to="/submit-complaint">Submit Complaint</NavLink>
+                <NavLink to="/ipc-explorer">IPC Explorer</NavLink>
+                <NavLink to="/chatbot">Legal Assistant</NavLink>
+              </>
+            )}
+
+            {/* Admin Links */}
             {isAuthenticated && userRole === 'admin' && (
               <>
-                <Link
-                  to="/admin/complaints"
-                  className={`text-sm font-medium transition-colors ${
-                    isActive('/admin/complaints') 
-                      ? 'text-primary-500' 
-                      : 'text-neutral-600 hover:text-primary-500'
-                  }`}
-                >
-                  Recent Complaints
-                </Link>
-                <Link
-                  to="/admin/analytics"
-                  className={`text-sm font-medium transition-colors ${
-                    isActive('/admin/analytics') 
-                      ? 'text-primary-500' 
-                      : 'text-neutral-600 hover:text-primary-500'
-                  }`}
-                >
-                  Analytics
-                </Link>
-                <Link
-                  to="/admin/lawyers"
-                  className={`text-sm font-medium transition-colors ${
-                    isActive('/admin/lawyers') 
-                      ? 'text-primary-500' 
-                      : 'text-neutral-600 hover:text-primary-500'
-                  }`}
-                >
-                  Lawyer Management
-                </Link>
+                <NavLink to="/admin/complaints">Recent Complaints</NavLink>
+                <NavLink to="/admin/analytics">Analytics</NavLink>
+                <NavLink to="/admin/lawyers">Lawyer Management</NavLink>
               </>
             )}
           </div>
@@ -136,7 +104,7 @@ const Navbar = () => {
               <div className="relative group">
                 <button className="flex items-center space-x-2 text-sm font-medium text-neutral-700 hover:text-primary-500 transition-colors">
                   <User className="h-4 w-4" />
-                  <span>{user?.name || 'User'}</span>
+                  <span>{user?.first_name || 'User'}</span>
                 </button>
                 
                 {/* Dropdown Menu */}
@@ -190,119 +158,37 @@ const Navbar = () => {
         {isMobileMenuOpen && (
           <div className="md:hidden py-4 border-t border-neutral-200">
             <div className="space-y-2">
-              {!isAuthenticated || userRole !== 'admin' ? (
+              {/* Logged-out User Links */}
+              {!isAuthenticated && (
                 <>
-                  <Link
-                    to="/"
-                    className={`block px-3 py-2 text-sm font-medium rounded-lg transition-colors ${
-                      isActive('/') 
-                        ? 'text-primary-500 bg-primary-50' 
-                        : 'text-neutral-600 hover:text-primary-500 hover:bg-neutral-50'
-                    }`}
-                    onClick={() => setIsMobileMenuOpen(false)}
-                  >
-                    Home
-                  </Link>
-                  
-                  <Link
-                    to="/ipc-explorer"
-                    className={`block px-3 py-2 text-sm font-medium rounded-lg transition-colors ${
-                      isActive('/ipc-explorer') 
-                        ? 'text-primary-500 bg-primary-50' 
-                        : 'text-neutral-600 hover:text-primary-500 hover:bg-neutral-50'
-                    }`}
-                    onClick={() => setIsMobileMenuOpen(false)}
-                  >
-                    IPC Explorer
-                  </Link>
+                  <MobileNavLink to="/">Home</MobileNavLink>
+                  <MobileNavLink to="/ipc-explorer">IPC Explorer</MobileNavLink>
                 </>
-              ) : null}
+              )}
 
+              {/* Logged-in Regular User Links */}
               {isAuthenticated && userRole === 'user' && (
                 <>
-                  <Link
-                    to="/submit-complaint"
-                    className={`block px-3 py-2 text-sm font-medium rounded-lg transition-colors ${
-                      isActive('/submit-complaint') 
-                        ? 'text-primary-500 bg-primary-50' 
-                        : 'text-neutral-600 hover:text-primary-500 hover:bg-neutral-50'
-                    }`}
-                    onClick={() => setIsMobileMenuOpen(false)}
-                  >
-                    Submit Complaint
-                  </Link>
-                  <Link
-                    to="/chatbot"
-                    className={`block px-3 py-2 text-sm font-medium rounded-lg transition-colors ${
-                      isActive('/chatbot') 
-                        ? 'text-primary-500 bg-primary-50' 
-                        : 'text-neutral-600 hover:text-primary-500 hover:bg-neutral-50'
-                    }`}
-                    onClick={() => setIsMobileMenuOpen(false)}
-                  >
-                    Legal Assistant
-                  </Link>
-                  <Link
-                    to="/dashboard"
-                    className={`block px-3 py-2 text-sm font-medium rounded-lg transition-colors ${
-                      isActive('/dashboard') 
-                        ? 'text-primary-500 bg-primary-50' 
-                        : 'text-neutral-600 hover:text-primary-500 hover:bg-neutral-50'
-                    }`}
-                    onClick={() => setIsMobileMenuOpen(false)}
-                  >
-                    Dashboard
-                  </Link>
+                  <MobileNavLink to="/dashboard">Home</MobileNavLink>
+                  <MobileNavLink to="/submit-complaint">Submit Complaint</MobileNavLink>
+                  <MobileNavLink to="/ipc-explorer">IPC Explorer</MobileNavLink>
+                  <MobileNavLink to="/chatbot">Legal Assistant</MobileNavLink>
                 </>
               )}
 
+              {/* Admin Links */}
               {isAuthenticated && userRole === 'admin' && (
                 <>
-                  <Link
-                    to="/admin/complaints"
-                    className={`block px-3 py-2 text-sm font-medium rounded-lg transition-colors ${
-                      isActive('/admin/complaints') 
-                        ? 'text-primary-500 bg-primary-50' 
-                        : 'text-neutral-600 hover:text-primary-500 hover:bg-neutral-50'
-                    }`}
-                    onClick={() => setIsMobileMenuOpen(false)}
-                  >
-                    Recent Complaints
-                  </Link>
-                  <Link
-                    to="/admin/analytics"
-                    className={`block px-3 py-2 text-sm font-medium rounded-lg transition-colors ${
-                      isActive('/admin/analytics') 
-                        ? 'text-primary-500 bg-primary-50' 
-                        : 'text-neutral-600 hover:text-primary-500 hover:bg-neutral-50'
-                    }`}
-                    onClick={() => setIsMobileMenuOpen(false)}
-                  >
-                    Analytics
-                  </Link>
-                  <Link
-                    to="/admin/lawyers"
-                    className={`block px-3 py-2 text-sm font-medium rounded-lg transition-colors ${
-                      isActive('/admin/lawyers') 
-                        ? 'text-primary-500 bg-primary-50' 
-                        : 'text-neutral-600 hover:text-primary-500 hover:bg-neutral-50'
-                    }`}
-                    onClick={() => setIsMobileMenuOpen(false)}
-                  >
-                    Lawyer Management
-                  </Link>
+                  <MobileNavLink to="/admin/complaints">Recent Complaints</MobileNavLink>
+                  <MobileNavLink to="/admin/analytics">Analytics</MobileNavLink>
+                  <MobileNavLink to="/admin/lawyers">Lawyer Management</MobileNavLink>
                 </>
               )}
 
+              {/* Auth Buttons / User Menu for Mobile */}
               {!isAuthenticated ? (
                 <div className="pt-4 space-y-2">
-                  <Link
-                    to="/login"
-                    className="block px-3 py-2 text-sm font-medium text-neutral-600 hover:text-primary-500 transition-colors"
-                    onClick={() => setIsMobileMenuOpen(false)}
-                  >
-                    Login
-                  </Link>
+                  <MobileNavLink to="/login">Login</MobileNavLink>
                   <Link
                     to="/register"
                     className="block mx-3 btn btn-primary"
