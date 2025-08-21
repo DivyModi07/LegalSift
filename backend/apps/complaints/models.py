@@ -13,7 +13,7 @@ class Complaint(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        db_table = 'complaint_history' # Sets the custom table name
+        db_table = 'complaint_history'
 
     def __str__(self):
         return f"Complaint {self.pk} by {self.user.email}"

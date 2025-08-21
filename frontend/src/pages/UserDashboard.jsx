@@ -271,7 +271,7 @@ const UserDashboard = () => {
                       <div className="flex-shrink-0 mt-4 lg:mt-0">
                         <button 
                           onClick={() => toggleDetails(complaint.id)} 
-                          className="inline-flex items-center px-6 py-3 bg-white border-2 border-[#C9A227] text-[#C9A227] font-semibold rounded-xl hover:bg-[#C9A227] hover:text-white transition-all duration-300 w-full "
+                          className="inline-flex items-center px-6 py-3 bg-white border-2 border-[#C9A227] text-[#C9A227] font-semibold rounded-xl hover:bg-[#C9A227] hover:text-white transition-all duration-300 w-full lg:w-auto group"
                         >
                           {expandedId === complaint.id ? 'Hide Details' : 'View Details'}
                           {expandedId === complaint.id ? 

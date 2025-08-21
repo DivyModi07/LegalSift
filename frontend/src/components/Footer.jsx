@@ -25,8 +25,6 @@ const Footer = () => {
   const legalLinks = [
     { to: '/privacy-policy', label: 'Privacy Policy' },
     { to: '/terms-of-service', label: 'Terms of Service' },
-    { to: '/cookie-policy', label: 'Cookie Policy' },
-    { to: '/disclaimer', label: 'Legal Disclaimer' },
   ];
 
   const quickLinks = getQuickLinks();
