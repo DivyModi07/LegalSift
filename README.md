@@ -2,11 +2,6 @@
 
 <div align="center">
 
-![LegalSift Logo](https://via.placeholder.com/200x200/FFD700/FFFFFF?text=⚖️+LegalSift)
-
-**Your intelligent companion for navigating Indian legal matters**
-
-[![Live Demo](https://img.shields.io/badge/Live%20Demo-00C7B7?style=for-the-badge&logo=netlify&logoColor=white)](https://legalsift.netlify.app)
 [![React](https://img.shields.io/badge/React-19.1.1-61DAFB?style=for-the-badge&logo=react&logoColor=white)](https://reactjs.org/)
 [![Django](https://img.shields.io/badge/Django-5.2.3-092E20?style=for-the-badge&logo=django&logoColor=white)](https://djangoproject.com/)
 [![Python](https://img.shields.io/badge/Python-3.11+-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://python.org/)
@@ -67,13 +62,6 @@ Become the go-to platform for legal guidance, complaint analysis, and IPC explor
 
 ---
 
-## 🎥 Video Demo
-
-<video src="assets/readme/LegalSift_demo.mp4" controls width="800"></video>
-
-If the embed doesn't render on your platform, download or open directly: [`assets/readme/LegalSift_demo.mp4`](assets/readme/LegalSift_demo.mp4)
-
----
 ## 🖼️ Screenshots
 
 ### 🏠 Landing Page
@@ -86,6 +74,11 @@ If the embed doesn't render on your platform, download or open directly: [`asset
 
 *Secure login with email verification and password recovery*
 
+### 📊 User Dashboard
+![User Dashboard](assets/readme/UserDashboard.png)
+
+*Personal dashboard for managing your legal complaints and AI analysis*
+
 ### 📝 Complaint Submission
 ![Complaint Form](assets/readme/SubmitComplaint.png)
 
@@ -95,11 +88,6 @@ If the embed doesn't render on your platform, download or open directly: [`asset
 ![Chatbot Interface](assets/readme/Chatbot.png)
 
 *Interactive chatbot providing instant legal guidance*
-
-### 📊 User Dashboard
-![User Dashboard](assets/readme/UserDashboard.png)
-
-*Personal dashboard for managing your legal complaints and AI analysis*
 
 ---
 
@@ -254,7 +242,6 @@ EMAIL_HOST_PASSWORD=your-app-password
 | `POST` | `/api/complaints/` | Submit new complaint |
 | `GET` | `/api/complaints/` | List user complaints |
 | `GET` | `/api/complaints/{id}/` | Get complaint details |
-| `PUT` | `/api/complaints/{id}/` | Update complaint |
 
 ### AI Endpoints
 
