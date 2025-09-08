@@ -18,44 +18,44 @@ const Register = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [errors, setErrors] = useState({});
-  
+
   const { register, sendOTP, verifyOTP, checkEmailPhone, isLoading, isVerifyingOTP } = useAuthStore();
   const navigate = useNavigate();
 
   const validateStep1 = () => {
     const newErrors = {};
-    
+
     if (!formData.firstName.trim()) {
       newErrors.firstName = 'First name is required';
     } else if (formData.firstName.trim().length < 2) {
       newErrors.firstName = 'First name must be at least 2 characters';
     }
-    
+
     if (!formData.lastName.trim()) {
       newErrors.lastName = 'Last name is required';
     } else if (formData.lastName.trim().length < 2) {
       newErrors.lastName = 'Last name must be at least 2 characters';
     }
-    
+
     if (!formData.email) {
       newErrors.email = 'Email is required';
     } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
       newErrors.email = 'Please enter a valid email address';
     }
-    
+
     if (!formData.phone) {
       newErrors.phone = 'Phone number is required';
     } else if (!/^[6-9]\d{9}$/.test(formData.phone)) {
       newErrors.phone = 'Please enter a valid 10-digit phone number';
     }
-    
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
   const validateStep2 = () => {
     const newErrors = {};
-    
+
     if (!formData.password) {
       newErrors.password = 'Password is required';
     } else if (formData.password.length < 6) {
@@ -63,26 +63,26 @@ const Register = () => {
     } else if (!/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/.test(formData.password)) {
       newErrors.password = 'Password must contain at least one uppercase letter, one lowercase letter, and one number';
     }
-    
+
     if (!formData.confirmPassword) {
       newErrors.confirmPassword = 'Please confirm your password';
     } else if (formData.password !== formData.confirmPassword) {
       newErrors.confirmPassword = 'Passwords do not match';
     }
-    
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
   const validateStep3 = () => {
     const newErrors = {};
-    
+
     if (!formData.otp) {
       newErrors.otp = 'OTP is required';
     } else if (!/^\d{6}$/.test(formData.otp)) {
       newErrors.otp = 'Please enter a valid 6-digit OTP';
     }
-    
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -120,14 +120,14 @@ const Register = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (!validateStep3()) {
       return;
     }
-    
+
     // First verify OTP
     const otpResult = await verifyOTP(formData.email, formData.otp);
-    
+
     if (otpResult.success) {
       // Then complete registration
       const registrationData = {
@@ -137,9 +137,9 @@ const Register = () => {
         phone_number: formData.phone,
         password: formData.password,
       };
-      
+
       const registerResult = await register(registrationData);
-      
+
       if (registerResult.success) {
         toast.success('🎉 Registration successful! Welcome to LegalSift!');
         // Small delay to show the success message before redirecting
@@ -160,7 +160,7 @@ const Register = () => {
       ...prev,
       [name]: value
     }));
-    
+
     // Clear error when user starts typing
     if (errors[name]) {
       setErrors(prev => ({
@@ -189,7 +189,7 @@ const Register = () => {
     <div className="min-h-screen flex items-center justify-center bg-[#FAFAF5] px-6 py-12 relative overflow-hidden">
       {/* Subtle Background Pattern */}
       <div className="absolute inset-0 opacity-[0.02]">
-        <div className="absolute top-0 left-0 w-full h-full bg-repeat opacity-50" 
+        <div className="absolute top-0 left-0 w-full h-full bg-repeat opacity-50"
              style={{
                backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23C9A227' fill-opacity='0.1'%3E%3Cpath d='M30 30c0-11.046 8.954-20 20-20s20 8.954 20 20-8.954 20-20 20-20-8.954-20-20z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`
              }}>
@@ -200,8 +200,8 @@ const Register = () => {
         {/* Header */}
         <div className="text-center space-y-6">
           <div className="flex justify-start">
-            <Link 
-              to="/" 
+            <Link
+              to="/"
               className="inline-flex items-center text-[#7A7A7A] hover:text-[#C9A227] transition-colors duration-300 group"
             >
               <ArrowLeft className="h-4 w-4 mr-2 group-hover:-translate-x-1 transition-transform duration-300" />
@@ -213,7 +213,7 @@ const Register = () => {
             <div className="mx-auto w-16 h-16 bg-gradient-to-br from-[#C9A227] to-[#b8911f] rounded-2xl flex items-center justify-center shadow-lg">
               <Scale className="h-8 w-8 text-white" />
             </div>
-            
+
             <div>
               <h2 className="text-3xl font-bold text-[#1C1C1C] mb-3 tracking-tight">
                 Join LegalSift
@@ -231,8 +231,8 @@ const Register = () => {
             <div key={stepNumber} className="flex items-center">
               <div className="flex flex-col items-center">
                 <div className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold transition-all duration-300 ${
-                  step >= stepNumber 
-                    ? 'bg-gradient-to-r from-[#C9A227] to-[#b8911f] text-white shadow-lg transform scale-110' 
+                  step >= stepNumber
+                    ? 'bg-gradient-to-r from-[#C9A227] to-[#b8911f] text-white shadow-lg transform scale-110'
                     : 'bg-gray-200 text-[#7A7A7A]'
                 }`}>
                   {stepNumber}
@@ -270,8 +270,8 @@ const Register = () => {
                         autoComplete="given-name"
                         required
                         className={`w-full pl-12 pr-4 py-3 rounded-xl border-2 ${
-                          errors.firstName 
-                            ? 'border-[#6B2F2F] focus:border-[#6B2F2F] focus:ring-[#6B2F2F]' 
+                          errors.firstName
+                            ? 'border-[#6B2F2F] focus:border-[#6B2F2F] focus:ring-[#6B2F2F]'
                             : 'border-gray-200 focus:border-[#C9A227] focus:ring-[#C9A227]'
                         } focus:outline-none focus:ring-2 focus:ring-opacity-20 transition-all duration-300 bg-gray-50 focus:bg-white text-[#1C1C1C] placeholder-[#7A7A7A]`}
                         placeholder="First name"
@@ -300,8 +300,8 @@ const Register = () => {
                         autoComplete="family-name"
                         required
                         className={`w-full pl-12 pr-4 py-3 rounded-xl border-2 ${
-                          errors.lastName 
-                            ? 'border-[#6B2F2F] focus:border-[#6B2F2F] focus:ring-[#6B2F2F]' 
+                          errors.lastName
+                            ? 'border-[#6B2F2F] focus:border-[#6B2F2F] focus:ring-[#6B2F2F]'
                             : 'border-gray-200 focus:border-[#C9A227] focus:ring-[#C9A227]'
                         } focus:outline-none focus:ring-2 focus:ring-opacity-20 transition-all duration-300 bg-gray-50 focus:bg-white text-[#1C1C1C] placeholder-[#7A7A7A]`}
                         placeholder="Last name"
@@ -331,8 +331,8 @@ const Register = () => {
                       autoComplete="email"
                       required
                       className={`w-full pl-12 pr-4 py-4 rounded-xl border-2 ${
-                        errors.email 
-                          ? 'border-[#6B2F2F] focus:border-[#6B2F2F] focus:ring-[#6B2F2F]' 
+                        errors.email
+                          ? 'border-[#6B2F2F] focus:border-[#6B2F2F] focus:ring-[#6B2F2F]'
                           : 'border-gray-200 focus:border-[#C9A227] focus:ring-[#C9A227]'
                       } focus:outline-none focus:ring-2 focus:ring-opacity-20 transition-all duration-300 bg-gray-50 focus:bg-white text-[#1C1C1C] placeholder-[#7A7A7A]`}
                       placeholder="Enter your email address"
@@ -361,8 +361,8 @@ const Register = () => {
                       autoComplete="tel"
                       required
                       className={`w-full pl-12 pr-4 py-4 rounded-xl border-2 ${
-                        errors.phone 
-                          ? 'border-[#6B2F2F] focus:border-[#6B2F2F] focus:ring-[#6B2F2F]' 
+                        errors.phone
+                          ? 'border-[#6B2F2F] focus:border-[#6B2F2F] focus:ring-[#6B2F2F]'
                           : 'border-gray-200 focus:border-[#C9A227] focus:ring-[#C9A227]'
                       } focus:outline-none focus:ring-2 focus:ring-opacity-20 transition-all duration-300 bg-gray-50 focus:bg-white text-[#1C1C1C] placeholder-[#7A7A7A]`}
                       placeholder="Enter your phone number"
@@ -415,8 +415,8 @@ const Register = () => {
                       autoComplete="new-password"
                       required
                       className={`w-full pl-12 pr-12 py-4 rounded-xl border-2 ${
-                        errors.password 
-                          ? 'border-[#6B2F2F] focus:border-[#6B2F2F] focus:ring-[#6B2F2F]' 
+                        errors.password
+                          ? 'border-[#6B2F2F] focus:border-[#6B2F2F] focus:ring-[#6B2F2F]'
                           : 'border-gray-200 focus:border-[#C9A227] focus:ring-[#C9A227]'
                       } focus:outline-none focus:ring-2 focus:ring-opacity-20 transition-all duration-300 bg-gray-50 focus:bg-white text-[#1C1C1C] placeholder-[#7A7A7A]`}
                       placeholder="Create a strong password"
@@ -452,8 +452,8 @@ const Register = () => {
                       autoComplete="new-password"
                       required
                       className={`w-full pl-12 pr-12 py-4 rounded-xl border-2 ${
-                        errors.confirmPassword 
-                          ? 'border-[#6B2F2F] focus:border-[#6B2F2F] focus:ring-[#6B2F2F]' 
+                        errors.confirmPassword
+                          ? 'border-[#6B2F2F] focus:border-[#6B2F2F] focus:ring-[#6B2F2F]'
                           : 'border-gray-200 focus:border-[#C9A227] focus:ring-[#C9A227]'
                       } focus:outline-none focus:ring-2 focus:ring-opacity-20 transition-all duration-300 bg-gray-50 focus:bg-white text-[#1C1C1C] placeholder-[#7A7A7A]`}
                       placeholder="Confirm your password"
@@ -537,8 +537,8 @@ const Register = () => {
                     maxLength="6"
                     required
                     className={`w-full py-4 px-4 rounded-xl border-2 ${
-                      errors.otp 
-                        ? 'border-[#6B2F2F] focus:border-[#6B2F2F] focus:ring-[#6B2F2F]' 
+                      errors.otp
+                        ? 'border-[#6B2F2F] focus:border-[#6B2F2F] focus:ring-[#6B2F2F]'
                         : 'border-gray-200 focus:border-[#C9A227] focus:ring-[#C9A227]'
                     } focus:outline-none focus:ring-2 focus:ring-opacity-20 transition-all duration-300 bg-gray-50 focus:bg-white text-[#1C1C1C] placeholder-[#7A7A7A] text-center text-xl tracking-widest font-bold`}
                     placeholder="000000"
@@ -557,41 +557,40 @@ const Register = () => {
                   <button
                     type="button"
                     onClick={resendOTP}
-                    disabled={isVerifyingOTP}
+                    disabled={isLoading}
                     className="text-[#C9A227] hover:text-[#1C1C1C] text-sm font-semibold transition-colors duration-300 hover:underline"
                   >
-                    {isVerifyingOTP ? 'Sending...' : "Didn't receive code? Resend"}
+                    {isLoading ? 'Sending...' : "Didn't receive code? Resend"}
                   </button>
                 </div>
 
                 <div className="flex space-x-4 pt-4">
                   <button
-                  type="button"
-                  onClick={handlePrevious}
-                  className="flex-1 py-3 px-6 border-2 border-[#7A7A7A] text-[#7A7A7A] font-semibold rounded-xl hover:bg-[#7A7A7A] hover:text-white transition-all duration-300 transform hover:-translate-y-0.5 hover:shadow-xl"
-                >
-                  Previous
-                </button>
+                    type="button"
+                    onClick={handlePrevious}
+                    className="flex-1 py-3 px-6 border-2 border-[#7A7A7A] text-[#7A7A7A] font-semibold rounded-xl hover:bg-[#7A7A7A] hover:text-white transition-all duration-300 transform hover:-translate-y-0.5 hover:shadow-xl"
+                  >
+                    Previous
+                  </button>
 
-                <button
-                  type="button"
-                  onClick={handleNext}
-                  disabled={isVerifyingOTP}
-                  className="flex-1 py-3 bg-gradient-to-r from-[#C9A227] to-[#b8911f] hover:from-[#b8911f] hover:to-[#a68019] text-white font-bold rounded-xl shadow-lg transition-all duration-300 transform hover:-translate-y-0.5 hover:shadow-xl disabled:opacity-70 disabled:cursor-not-allowed disabled:transform-none"
-                >
-                  {isVerifyingOTP ? (
-                    <div className="flex items-center justify-center">
-                      <div className="animate-spin h-5 w-5 border-2 border-white border-t-transparent rounded-full mr-2"></div>
-                      Sending OTP...
-                    </div>
-                  ) : (
-                    <div className="flex items-center justify-center">
-                      <span>Send OTP</span>
-                      <ArrowRight className="ml-2 h-5 w-5" />
-                    </div>
-                  )}
-                </button>
-
+                  <button
+                    type="submit"
+                    onClick={handleSubmit}
+                    disabled={isLoading}
+                    className="flex-1 py-3 bg-gradient-to-r from-[#C9A227] to-[#b8911f] hover:from-[#b8911f] hover:to-[#a68019] text-white font-bold rounded-xl shadow-lg transition-all duration-300 transform hover:-translate-y-0.5 hover:shadow-xl disabled:opacity-70 disabled:cursor-not-allowed disabled:transform-none"
+                  >
+                    {isLoading ? (
+                      <div className="flex items-center justify-center">
+                        <div className="animate-spin h-5 w-5 border-2 border-white border-t-transparent rounded-full mr-2"></div>
+                        Creating Account...
+                      </div>
+                    ) : (
+                      <div className="flex items-center justify-center">
+                        <span>Create Account</span>
+                        <ArrowRight className="ml-2 h-5 w-5" />
+                      </div>
+                    )}
+                  </button>
                 </div>
               </>
             )}

@@ -71,7 +71,7 @@ def analyze_complaint(complaint_text: str):
     high_confidence_indices = [idx for i, idx in enumerate(indices[0]) if similarity_scores[i] >= CONFIDENCE_THRESHOLD]
 
     if not high_confidence_indices:
-        high_confidence_indices = indices[0][:5]
+        high_confidence_indices = indices[0][:3]
         
     recommendations = ml_models["df_lookup"].iloc[high_confidence_indices]
     

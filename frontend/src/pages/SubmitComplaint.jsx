@@ -1,13 +1,10 @@
 import { useState, useRef, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { 
   FileText, 
-  MapPin, 
   AlertTriangle, 
   CheckCircle, 
   Clock,
   Shield,
-  ArrowLeft,
   Send,
   Loader,
   ChevronDown,
@@ -20,7 +17,6 @@ import complaintService from '../services/complaintService';
 
 const SubmitComplaint = () => {
   const { user } = useAuthStore();
-  const navigate = useNavigate();
   const topRef = useRef(null); // Ref for the scroll target
 
   const [formData, setFormData] = useState({
@@ -298,6 +294,7 @@ const SubmitComplaint = () => {
                     placeholder="Please provide a detailed description of your legal issue. Include relevant dates, names, and any supporting details..."
                     value={formData.complaint}
                     onChange={handleChange}
+                    maxLength={1000}
                   />
                   {errors.complaint && (
                     <p className="text-red-600 text-sm mt-1 font-medium">{errors.complaint}</p>
@@ -329,9 +326,9 @@ const SubmitComplaint = () => {
             </div>
           </div>
 
-          {/* Analysis Result */}
+          {/* Analysis Result / Placeholder */}
           <div className="space-y-6">
-            {showResult && analysisResult && (
+            {showResult && analysisResult ? (
               <div className="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
                 {/* Result Header */}
                 <div className="bg-gradient-to-r from-[#1C1C1C] to-[#2D2D2D] px-8 py-6">
@@ -441,6 +438,57 @@ const SubmitComplaint = () => {
                         Keep all relevant documents and evidence safe
                       </li>
                     </ul>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
+                {/* Placeholder Header */}
+                <div className="bg-gradient-to-r from-[#1C1C1C] to-[#2D2D2D] px-8 py-6">
+                  <div className="flex items-center">
+                    <div className="bg-[#C9A227] p-2 rounded-lg mr-3">
+                      <FileText className="h-6 w-6 text-white" />
+                    </div>
+                    <h2 className="text-2xl font-bold text-white">
+                      Analysis Preview
+                    </h2>
+                  </div>
+                  <p className="text-gray-300 mt-2">Submit your complaint to view AI insights here</p>
+                </div>
+
+                {/* Placeholder Content */}
+                <div className="p-8 space-y-6">
+                  <div className="bg-gradient-to-br from-gray-50 to-white p-4 rounded-xl border border-gray-200">
+                    <p className="font-bold text-[#1C1C1C] text-lg mb-1">What you'll get</p>
+                    <p className="text-[#7A7A7A]">Predicted category, urgency level, and recommended IPC sections with details.</p>
+                  </div>
+                  <div className="grid grid-cols-1 gap-4">
+                    <div className="flex items-start space-x-3">
+                      <CheckCircle className="h-5 w-5 text-[#C9A227] mt-0.5" />
+                      <div>
+                        <p className="font-semibold text-[#1C1C1C]">Predicted Category</p>
+                        <p className="text-[#7A7A7A] text-sm">An AI-derived classification of your complaint to aid routing and context.</p>
+                      </div>
+                    </div>
+                    <div className="flex items-start space-x-3">
+                      <Clock className="h-5 w-5 text-[#C9A227] mt-0.5" />
+                      <div>
+                        <p className="font-semibold text-[#1C1C1C]">Urgency Assessment</p>
+                        <p className="text-[#7A7A7A] text-sm">An estimate of how urgent your matter is so you can act accordingly.</p>
+                      </div>
+                    </div>
+                    <div className="flex items-start space-x-3">
+                      <Shield className="h-5 w-5 text-[#C9A227] mt-0.5" />
+                      <div>
+                        <p className="font-semibold text-[#1C1C1C]">Recommended IPC Sections</p>
+                        <p className="text-[#7A7A7A] text-sm">A curated list of sections relevant to your case with punishment, bailability, and jurisdiction.</p>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="bg-yellow-50 border-l-4 border-yellow-500 rounded-xl p-4">
+                    <p className="text-yellow-800 text-sm">
+                      Tip: The more detailed your description, the better the recommendations.
+                    </p>
                   </div>
                 </div>
               </div>

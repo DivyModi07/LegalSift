@@ -29,6 +29,20 @@ api.interceptors.response.use(
     const originalRequest = error.config;
 
     if (error.response?.status === 401 && !originalRequest._isRetry) {
+      const requestUrl = originalRequest?.url || '';
+      const isAuthEndpoint =
+        requestUrl.includes('/users/login') ||
+        requestUrl.includes('/users/register') ||
+        requestUrl.includes('/users/send-otp') ||
+        requestUrl.includes('/users/verify-otp') ||
+        requestUrl.includes('/users/reset-password') ||
+        requestUrl.includes('/users/token');
+
+      // For auth endpoints, do not attempt refresh or redirect; let caller handle the error
+      if (isAuthEndpoint) {
+        return Promise.reject(error);
+      }
+
       originalRequest._isRetry = true;
 
       try {

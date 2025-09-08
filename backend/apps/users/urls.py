@@ -4,7 +4,6 @@ from django.urls import path
 from .views import (UserRegistrationView, UserLoginView, send_otp_email, verify_otp, reset_password,check_email_phone) 
 from rest_framework_simplejwt.views import TokenRefreshView
 
-# This list MUST be named 'urlpatterns'
 urlpatterns = [
     # Core Authentication Routes
     path('register/', UserRegistrationView.as_view(), name='user-register'),
