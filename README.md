@@ -67,35 +67,37 @@ Become the go-to platform for legal guidance, complaint analysis, and IPC explor
 
 ---
 
+## 🎥 Video Demo
+
+<video src="assets/readme/LegalSift_demo.mp4" controls width="800"></video>
+
+If the embed doesn't render on your platform, download or open directly: [`assets/readme/LegalSift_demo.mp4`](assets/readme/LegalSift_demo.mp4)
+
+---
 ## 🖼️ Screenshots
 
 ### 🏠 Landing Page
-![Landing Page](https://via.placeholder.com/1200x600/F5F5F5/333333?text=Landing+Page+-+Modern+Design+with+AI+Features)
+![Landing Page](assets/readme/LandingPage.png)
 
 *Clean, modern interface showcasing AI-powered legal assistance*
 
 ### 🔐 Authentication
-![Login Page](https://via.placeholder.com/1200x600/FFFFFF/333333?text=Login+Page+-+Secure+Authentication)
+![Login Page](assets/readme/LoginPage.png)
 
 *Secure login with email verification and password recovery*
 
 ### 📝 Complaint Submission
-![Complaint Form](https://via.placeholder.com/1200x600/F8F9FA/333333?text=Complaint+Submission+-+AI+Analysis+Interface)
+![Complaint Form](assets/readme/SubmitComplaint.png)
 
 *Intuitive complaint submission with real-time AI analysis*
 
 ### 🤖 AI Chatbot
-![Chatbot Interface](https://via.placeholder.com/1200x600/E3F2FD/333333?text=AI+Chatbot+-+Legal+Assistant+Interface)
+![Chatbot Interface](assets/readme/Chatbot.png)
 
 *Interactive chatbot providing instant legal guidance*
 
-### 📚 IPC Explorer
-![IPC Explorer](https://via.placeholder.com/1200x600/F3E5F5/333333?text=IPC+Explorer+-+Search+and+Browse+Legal+Sections)
-
-*Comprehensive IPC section browser with search functionality*
-
 ### 📊 User Dashboard
-![User Dashboard](https://via.placeholder.com/1200x600/FFF3E0/333333?text=User+Dashboard+-+Personal+Legal+Assistant)
+![User Dashboard](assets/readme/UserDashboard.png)
 
 *Personal dashboard for managing your legal complaints and AI analysis*
 
